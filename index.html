@@ -1,1149 +1,1769 @@
-<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Controle de FIIs</title>
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Painel de FIIs | SoulFork</title>
   <style>
-    :root {
-      --bg: #0f172a;
-      --bg-card: #111827;
-      --bg-alt: #020617;
-      --border: #1f2937;
-      --accent: #38bdf8;
-      --accent-soft: rgba(56, 189, 248, 0.15);
-      --text: #e5e7eb;
-      --text-soft: #9ca3af;
-      --danger: #f97373;
-      --success: #4ade80;
-      --radius: 8px;
+    :root{
+      --bg:#000000; --bg2:#050505; --card:rgba(255,255,255,.04); --line:rgba(255,255,255,.10);
+      --txt:#ffffff; --muted:#b7c0cf; --accent:#8fd4ff; --good:#73e0a1; --bad:#ff8a8a;
+      --seg:#8fd4ff; --seg2:#ffe082; --seg3:#ffffff; --seg4:#9ccfff; --mono:ui-monospace,Consolas,monospace;
     }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #1f2937 0, #020617 55%);
-      color: var(--text);
-      padding: 16px;
-    }
-
-    h1, h2, h3 {
-      margin: 0 0 12px;
-      font-weight: 600;
-    }
-
-    h1 {
-      font-size: 1.6rem;
-    }
-
-    h2 {
-      font-size: 1.2rem;
-    }
-
-    .app-shell {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .header {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .header-title {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .header-title small {
-      color: var(--text-soft);
-      font-size: 0.8rem;
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: var(--accent-soft);
-      color: var(--accent);
-      font-size: 0.75rem;
-    }
-
-    .pill span {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: var(--accent);
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
-      gap: 16px;
-    }
-
-    @media (max-width: 900px) {
-      .grid {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
-
-    .card {
-      background: linear-gradient(145deg, var(--bg-card), var(--bg-alt));
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      padding: 14px 14px 10px;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      gap: 8px;
-    }
-
-    .card-header small {
-      color: var(--text-soft);
-      font-size: 0.75rem;
-    }
-
-    .card-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.78rem;
-      margin-top: 4px;
-    }
-
-    th, td {
-      padding: 6px 6px;
-      border-bottom: 1px solid #111827;
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    thead th {
-      position: sticky;
-      top: 0;
-      background: #020617;
-      z-index: 1;
-      font-weight: 500;
-      color: var(--text-soft);
-    }
-
-    tbody tr:nth-child(even) {
-      background: rgba(15, 23, 42, 0.6);
-    }
-
-    tbody tr:nth-child(odd) {
-      background: rgba(15, 23, 42, 0.3);
-    }
-
-    tfoot td {
-      font-weight: 600;
-      border-top: 1px solid var(--border);
-      background: #020617;
-    }
-
-    .right {
-      text-align: right;
-    }
-
-    input[type="number"],
-    input[type="date"],
-    select {
-      background: #020617;
-      border-radius: 4px;
-      border: 1px solid #1f2937;
-      color: var(--text);
-      padding: 3px 4px;
-      font-size: 0.78rem;
-      width: 100%;
-    }
-
-    input[type="number"]:focus,
-    input[type="date"]:focus,
-    select:focus {
-      outline: 1px solid var(--accent);
-      border-color: var(--accent);
-    }
-
-    .btn {
-      border-radius: 999px;
-      border: 1px solid #1f2937;
-      background: #020617;
-      color: var(--text);
-      padding: 5px 12px;
-      font-size: 0.78rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: background 0.15s, transform 0.05s, border-color 0.15s;
-    }
-
-    .btn:hover {
-      background: #111827;
-      border-color: var(--accent);
-    }
-
-    .btn:active {
-      transform: scale(0.97);
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #020617;
-    }
-
-    .btn-primary:hover {
-      background: #0ea5e9;
-    }
-
-    .btn-ghost {
-      background: transparent;
-      border-color: transparent;
-      color: var(--text-soft);
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid #1f2937;
-      font-size: 0.7rem;
-      color: var(--text-soft);
-    }
-
-    .badge-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 999px;
-      background: var(--success);
-    }
-
-    .summary-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 4px;
-      font-size: 0.78rem;
-      color: var(--text-soft);
-    }
-
-    .summary-row span {
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid #1f2937;
-    }
-
-    .tag-danger {
-      color: var(--danger);
-    }
-
-    .tag-success {
-      color: var(--success);
-    }
-
-    .flex {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .flex-grow {
-      flex: 1;
-    }
-
-    .mt-4 {
-      margin-top: 8px;
-    }
-
-    .mt-6 {
-      margin-top: 12px;
-    }
-
-    .small {
-      font-size: 0.75rem;
-      color: var(--text-soft);
-    }
-
-    .scroll-y {
-      max-height: 320px;
-      overflow: auto;
-    }
-
-    canvas {
-      max-width: 100%;
-    }
-
-    .pill-danger {
-      background: rgba(248, 113, 113, 0.1);
-      color: var(--danger);
-    }
-
-    .pill-success {
-      background: rgba(74, 222, 128, 0.1);
-      color: var(--success);
-    }
-
-    .pill-neutral {
-      background: rgba(148, 163, 184, 0.1);
-      color: #e5e7eb;
-    }
-
-    .text-mono {
-      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    }
+    *{box-sizing:border-box} html,body{margin:0;min-height:100%;background:radial-gradient(circle at 20% 10%, rgba(143,212,255,.08) 0, transparent 32%),radial-gradient(circle at 85% 20%, rgba(255,224,130,.06) 0, transparent 26%),linear-gradient(180deg,var(--bg2),var(--bg));color:var(--txt);font-family:Inter,system-ui,Segoe UI,Arial,sans-serif}
+    body:before{content:"";position:fixed;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.02),transparent 30%,rgba(255,255,255,.01));pointer-events:none}
+    .wrap{max-width:1500px;margin:0 auto;padding:14px}
+    .top{display:flex;gap:16px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(143,212,255,.24),rgba(255,224,130,.12));border:1px solid var(--line);font-weight:800}
+    .title{font-size:18px;font-weight:800}
+    .sub{color:var(--muted);font-size:12px}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap}
+    .tab{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--txt);cursor:pointer;font-size:12px}
+    .tab.active{background:rgba(143,212,255,.18);border-color:rgba(143,212,255,.45)}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+    .card{grid-column:span 12;background:linear-gradient(180deg,var(--card),rgba(255,255,255,.02));border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:0 18px 42px rgba(0,0,0,.22)}
+    .execCard{padding:10px}
+    .execCard .kpi{padding:8px}
+    .execCard .kpi .v{font-size:16px}
+    .card h2{margin:0 0 10px;font-size:15px}
+    .card h3{margin:12px 0 8px;font-size:12px;color:var(--muted)}
+    .hidden{display:none}
+    @media(min-width:980px){.span-4{grid-column:span 4}.span-6{grid-column:span 6}.span-8{grid-column:span 8}.span-12{grid-column:span 12}}
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .kpi{padding:10px;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.10)}
+    .kpi .k{color:var(--muted);font-size:11px}.kpi .v{font-size:18px;font-weight:800;margin-top:5px}
+    .bar{height:10px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+    .bar>div{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),#ffffff)}
+    .row{display:grid;grid-template-columns:1.1fr .68fr .68fr .66fr .78fr .72fr;gap:5px;align-items:center;padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.06)}
+    .row.head{color:var(--muted);font-size:11px;font-weight:700}
+    .table{border:1px solid var(--line);border-radius:14px;overflow:auto}
+    .table .row:last-child{border-bottom:none}
+    .table .row.head > div{cursor:pointer;user-select:none}
+    .table .row.head > div:hover{color:var(--txt)}
+    .sortMark{font-size:10px;color:var(--accent);margin-left:4px}
+    .scrollX{overflow-x:auto}
+    .compact .row{grid-template-columns:1fr .74fr .68fr .52fr .52fr .48fr .48fr .54fr .58fr auto;gap:2px;min-width:1120px;padding:4px 5px;font-size:9px}
+    .compact .row.head{font-size:10px}
+    input,select,button,textarea{font:inherit}
+    input,select,textarea{width:100%;padding:9px 10px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--txt);font-size:12px}
+    button{padding:9px 12px;border-radius:12px;border:1px solid rgba(143,212,255,.35);background:rgba(143,212,255,.12);color:var(--txt);cursor:pointer;font-size:12px}
+    button.secondary{border-color:var(--line);background:rgba(255,255,255,.05)}
+    button.danger{border-color:rgba(255,118,118,.35);background:rgba(255,118,118,.12)}
+    .form{display:grid;grid-template-columns:repeat(12,1fr);gap:8px}
+    .col-3{grid-column:span 12}.col-4{grid-column:span 12}.col-6{grid-column:span 12}
+    @media(min-width:900px){.col-3{grid-column:span 3}.col-4{grid-column:span 4}.col-6{grid-column:span 6}}
+    .note{color:var(--muted);font-size:11px;line-height:1.4}
+    .mini{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:pre-wrap}
+    .pill{display:inline-flex;gap:6px;align-items:center;padding:5px 9px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:11px;color:var(--muted)}
+    .grid2{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:980px){.grid2{grid-template-columns:1fr 1fr}}
+    .ideas{display:grid;grid-template-columns:1fr;gap:8px}
+    .idea{padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03);font-size:12px;line-height:1.35}
+    .idea b{color:var(--txt)}
+    .modeSwitch{display:flex;gap:6px;flex-wrap:wrap}
+    .modeSwitch button{font-size:11px;padding:7px 10px}
+    .modeSwitch button.active{background:rgba(143,212,255,.22);border-color:rgba(143,212,255,.55)}
+    .functionGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}
+    .functionCard{padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03);cursor:pointer;transition:transform .15s ease, border-color .15s ease, background .15s ease}
+    .functionCard:hover{transform:translateY(-1px);border-color:rgba(143,212,255,.45);background:rgba(143,212,255,.08)}
+    .functionCard .name{font-size:12px;font-weight:800;color:var(--txt)}
+    .functionCard .desc{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.35}
   </style>
 </head>
 <body>
-  <div class="app-shell">
-    <header class="header">
-      <div class="header-title">
-        <h1>Dashboard de FIIs</h1>
-        <small>Baseado na sua planilha de FIIs, Setores, Aporte e Compras.</small>
-      </div>
-      <div class="flex">
-        <div class="pill">
-          <span></span>
-          <strong>Carteira ao vivo</strong>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <div class="logo">FII</div>
+        <div>
+          <div class="title txt-white">Painel de Fundos Imobiliários</div>
+          <div class="sub txt-blue">Controle, análise e rebalanceamento da carteira</div>
         </div>
-        <button class="btn btn-primary" onclick="recalcularTudo()">
-          🔄 Recalcular tudo
-        </button>
       </div>
-    </header>
-
-    <div class="grid">
-      <!-- COLUNA ESQUERDA: FIIs + Compras -->
-      <div class="col-left">
-        <!-- FIIs -->
-        <section class="card">
-          <div class="card-header">
-            <div>
-              <h2>FIIs</h2>
-              <small>Posição por ativo, preço médio e valor de mercado.</small>
-            </div>
-            <div class="card-actions">
-              <span class="badge">
-                <span class="badge-dot"></span>
-                Atualiza com base nas compras
-              </span>
-            </div>
-          </div>
-
-          <div class="scroll-y">
-            <table id="tabela-fiis">
-              <thead>
-                <tr>
-                  <th>Ativo</th>
-                  <th>Setor</th>
-                  <th class="right">Qtd. Atual</th>
-                  <th class="right">Preço Atual</th>
-                  <th class="right">Qtd. Comprada</th>
-                  <th class="right">Qtd. Total</th>
-                  <th class="right">Valor Total</th>
-                  <th class="right">Preço Médio</th>
-                  <th class="right">Posição Atual</th>
-                </tr>
-              </thead>
-              <tbody>
-                <!-- Dados da sua planilha -->
-                <tr data-ativo="BRCO11" data-setor="logística">
-                  <td>BRCO11</td>
-                  <td>logística</td>
-                  <td class="right"><input type="number" value="1" step="1" min="0" /></td>
-                  <td class="right"><input type="number" value="117.38" step="0.01" min="0" /></td>
-                  <td class="right" data-qtd-comprada>0</td>
-                  <td class="right" data-qtd-total></td>
-                  <td class="right" data-valor-total></td>
-                  <td class="right" data-preco-medio></td>
-                  <td class="right" data-posicao-atual></td>
-                </tr>
-                <tr data-ativo="BTLG11" data-setor="logística">
-                  <td>BTLG11</td>
-                  <td>logística</td>
-                  <td class="right"><input type="number" value="2" step="1" min="0" /></td>
-                  <td class="right"><input type="number" value="103.56" step="0.01" min="0" /></td>
-                  <td class="right" data-qtd-comprada>0</td>
-                  <td class="right" data-qtd-total></td>
-                  <td class="right" data-valor-total></td>
-                  <td class="right" data-preco-medio></td>
-                  <td class="right" data-posicao-atual></td>
-                </tr>
-                <tr data-ativo="CPTS11" data-setor="papel">
-                  <td>CPTS11</td>
-                  <td>papel</td>
-                  <td class="right"><input type="number" value="33" step="1" min="0" /></td>
-                  <td class="right"><input type="number" value="7.83" step="0.01" min="0" /></td>
-                  <td class="right" data-qtd-comprada>0</td>
-                  <td class="right" data-qtd-total></td>
-                  <td class="right" data-valor-total></td>
-                  <td class="right" data-preco-medio></td>
-                  <td class="right" data-posicao-atual></td>
-                </tr>
-                <tr data-ativo="HFOF11" data-setor="híbridos">
-                  <td>HFOF11</td>
-                  <td>híbridos</td>
-                  <td class="right"><input type="number" value="10" step="1" min="0" /></td>
-                  <td class="right"><input type="number" value="6.74" step="0.01" min="0" /></td>
-                  <td class="right" data-qtd-comprada>0</td>
-                  <td class="right" data-qtd-total></td>
-                  <td class="right" data-valor-total></td>
-                  <td class="right" data-preco-medio></td>
-                  <td class="right" data-posicao-atual></td>
-                </tr>
-                <tr data-ativo="HGBS11" data-setor="shoppings">
-                  <td>HGBS11</td>
-                  <td>shoppings</td>
-                  <td class="right"><input type="number" value="18" step="1" min="0" /></td>
-                  <td class="right"><input type="number" value="20.62" step="0.01" min="0" /></td>
-                  <td class="right" data-qtd-comprada>0</td>
-                  <td class="right" data-qtd-total></td>
-                  <td class="right" data-valor-total></td>
-                  <td class="right" data-preco-medio></td>
-                  <td class="right" data-posicao-atual></td>
-                </tr>
-                <tr data-ativo="HGCR11" data-setor="papel">
-                  <td>HGCR11</td>
-                  <td>papel</td>
-                  <td class="right"><input type="number" value="4" step="1" min="0" /></td>
-                  <td class="right"><input type="number" value="97.03" step="0.01" min="0" /></td>
-                  <td class="right" data-qtd-comprada>0</td>
-                  <td class="right" data-qtd-total></td>
-                  <td class="right" data-valor-total></td>
-                  <td class="right" data-preco-medio></td>
-                  <td class="right" data-posicao-atual></td>
-                </tr>
-                <tr data-ativo="HGLG11" data-setor="logística">
-                  <td>HGLG11</td>
-                  <td>logística</td>
-                  <td class="right"><input type="number" value="1" step="1" min="0" /></td>
-                  <td class="right"><input type="number" value="155.72" step="0.01" min="0" /></td>
-                  <td class="right" data-qtd-comprada>0</td>
-                  <td class="right" data-qtd-total></td>
-                  <td class="right" data-valor-total></td>
-                  <td class="right" data-preco-medio></td>
-                  <td class="right" data-posicao-atual></td>
-                </tr>
-                <tr data-ativo="HGRE11" data-setor="lajes corporativas">
-                  <td>HGRE11</td>
-                  <td>lajes corporativas</td>
-                  <td class="right"><input type="number" value="1" step="1" min="0" /></td>
-                  <td class="right"><input type="number" value="129.05" step="0.01" min="0" /></td>
-                  <td class="right" data-qtd-comprada>0</td>
-                  <td class="right" data-qtd-total></td>
-                  <td class="right" data-valor-total></td>
-                  <td class="right" data-preco-medio></td>
-                  <td class="right" data-posicao-atual></td>
-                </tr>
-                <tr data-ativo="KNCR11" data-setor="papel">
-                  <td>KNCR11</td>
-                  <td>papel</td>
-                  <td class="right"><input type="number" value="2" step="1" min="0" /></td>
-                  <td class="right"><input type="number" value="105.76" step="0.01" min="0" /></td>
-                  <td class="right" data-qtd-comprada>0</td>
-                  <td class="right" data-qtd-total></td>
-                  <td class="right" data-valor-total></td>
-                  <td class="right" data-preco-medio></td>
-                  <td class="right" data-posicao-atual></td>
-                </tr>
-                <tr data-ativo="KNRI11" data-setor="híbridos">
-                  <td>KNRI11</td>
-                  <td>híbridos</td>
-                  <td class="right"><input type="number" value="1" step="1" min="0" /></td>
-                  <td class="right"><input type="number" value="166.45" step="0.01" min="0" /></td>
-                  <td class="right" data-qtd-comprada>0</td>
-                  <td class="right" data-qtd-total></td>
-                  <td class="right" data-valor-total></td>
-                  <td class="right" data-preco-medio></td>
-                  <td class="right" data-posicao-atual></td>
-                </tr>
-                <tr data-ativo="MCCI11" data-setor="papel">
-                  <td>MCCI11</td>
-                  <td>papel</td>
-                  <td class="right"><input type="number" value="4" step="1" min="0" /></td>
-                  <td class="right"><input type="number" value="94.82" step="0.01" min="0" /></td>
-                  <td class="right" data-qtd-comprada>0</td>
-                  <td class="right" data-qtd-total></td>
-                  <td class="right" data-valor-total></td>
-                  <td class="right" data-preco-medio></td>
-                  <td class="right" data-posicao-atual></td>
-                </tr>
-                <tr data-ativo="PVBI11" data-setor="lajes corporativas">
-                  <td>PVBI11</td>
-                  <td>lajes corporativas</td>
-                  <td class="right"><input type="number" value="1" step="1" min="0" /></td>
-                  <td class="right"><input type="number" value="74.91" step="0.01" min="0" /></td>
-                  <td class="right" data-qtd-comprada>0</td>
-                  <td class="right" data-qtd-total></td>
-                  <td class="right" data-valor-total></td>
-                  <td class="right" data-preco-medio></td>
-                  <td class="right" data-posicao-atual></td>
-                </tr>
-                <tr data-ativo="RBRR11" data-setor="papel">
-                  <td>RBRR11</td>
-                  <td>papel</td>
-                  <td class="right"><input type="number" value="1" step="1" min="0" /></td>
-                  <td class="right"><input type="number" value="83.44" step="0.01" min="0" /></td>
-                  <td class="right" data-qtd-comprada>0</td>
-                  <td class="right" data-qtd-total></td>
-                  <td class="right" data-valor-total></td>
-                  <td class="right" data-preco-medio></td>
-                  <td class="right" data-posicao-atual></td>
-                </tr>
-                <tr data-ativo="VINO11" data-setor="lajes corporativas">
-                  <td>VINO11</td>
-                  <td>lajes corporativas</td>
-                  <td class="right"><input type="number" value="2" step="1" min="0" /></td>
-                  <td class="right"><input type="number" value="5.02" step="0.01" min="0" /></td>
-                  <td class="right" data-qtd-comprada>0</td>
-                  <td class="right" data-qtd-total></td>
-                  <td class="right" data-valor-total></td>
-                  <td class="right" data-preco-medio></td>
-                  <td class="right" data-posicao-atual></td>
-                </tr>
-                <tr data-ativo="XPLG11" data-setor="logística">
-                  <td>XPLG11</td>
-                  <td>logística</td>
-                  <td class="right"><input type="number" value="1" step="1" min="0" /></td>
-                  <td class="right"><input type="number" value="100.19" step="0.01" min="0" /></td>
-                  <td class="right" data-qtd-comprada>0</td>
-                  <td class="right" data-qtd-total></td>
-                  <td class="right" data-valor-total></td>
-                  <td class="right" data-preco-medio></td>
-                  <td class="right" data-posicao-atual></td>
-                </tr>
-                <tr data-ativo="XPML11" data-setor="shoppings">
-                  <td>XPML11</td>
-                  <td>shoppings</td>
-                  <td class="right"><input type="number" value="2" step="1" min="0" /></td>
-                  <td class="right"><input type="number" value="110.90" step="0.01" min="0" /></td>
-                  <td class="right" data-qtd-comprada>0</td>
-                  <td class="right" data-qtd-total></td>
-                  <td class="right" data-valor-total></td>
-                  <td class="right" data-preco-medio></td>
-                  <td class="right" data-posicao-atual></td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="8">Total da Carteira (valor de mercado)</td>
-                  <td class="right text-mono" id="total-carteira"></td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-
-          <div class="summary-row">
-            <span>Total de ativos: <strong id="total-ativos"></strong></span>
-            <span>Ticket médio por ativo: <strong id="ticket-medio"></strong></span>
-          </div>
-        </section>
-
-        <!-- Compras -->
-        <section class="card mt-6">
-          <div class="card-header">
-            <div>
-              <h2>Compras</h2>
-              <small>Registre novas compras e veja o impacto no preço médio.</small>
-            </div>
-            <div class="card-actions">
-              <button class="btn btn-primary" onclick="adicionarCompraLinha()">
-                ➕ Nova compra
-              </button>
-              <button class="btn btn-ghost" onclick="limparCompras()">
-                🧹 Limpar compras
-              </button>
-            </div>
-          </div>
-
-          <div class="small">
-            Cada linha de compra atualiza automaticamente: <strong>Qtd. Comprada</strong>, <strong>Qtd. Total</strong>, <strong>Valor Total</strong> e <strong>Preço Médio</strong do ativo.
-          </div>
-
-          <div class="scroll-y mt-4">
-            <table id="tabela-compras">
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Ativo</th>
-                  <th class="right">Qtde</th>
-                  <th class="right">Preço</th>
-                  <th class="right">Valor</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                <!-- Linhas serão adicionadas via JS -->
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </div>
-
-      <!-- COLUNA DIREITA: Setores + Aporte + Gráfico + Momento -->
-      <div class="col-right">
-        <!-- Setores -->
-        <section class="card">
-          <div class="card-header">
-            <div>
-              <h2>Setores</h2>
-              <small>Alocação atual vs. meta por setor.</small>
-            </div>
-            <div class="card-actions">
-              <span class="badge">
-                🎯 Metas configuráveis
-              </span>
-            </div>
-          </div>
-
-          <div class="scroll-y">
-            <table id="tabela-setores">
-              <thead>
-                <tr>
-                  <th>Setor</th>
-                  <th class="right">Valor Total</th>
-                  <th class="right">% Atual</th>
-                  <th class="right">% Meta</th>
-                  <th class="right">Diferença</th>
-                  <th class="right">Falta p/ Meta</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr data-setor="papel">
-                  <td>papel</td>
-                  <td class="right" data-valor-setor></td>
-                  <td class="right" data-pct-atual></td>
-                  <td class="right">
-                    <input type="number" value="40" step="0.1" min="0" max="100" />%
-                  </td>
-                  <td class="right" data-diferenca></td>
-                  <td class="right" data-falta></td>
-                </tr>
-                <tr data-setor="logística">
-                  <td>logística</td>
-                  <td class="right" data-valor-setor></td>
-                  <td class="right" data-pct-atual></td>
-                  <td class="right">
-                    <input type="number" value="25" step="0.1" min="0" max="100" />%
-                  </td>
-                  <td class="right" data-diferenca></td>
-                  <td class="right" data-falta></td>
-                </tr>
-                <tr data-setor="shoppings">
-                  <td>shoppings</td>
-                  <td class="right" data-valor-setor></td>
-                  <td class="right" data-pct-atual></td>
-                  <td class="right">
-                    <input type="number" value="15" step="0.1" min="0" max="100" />%
-                  </td>
-                  <td class="right" data-diferenca></td>
-                  <td class="right" data-falta></td>
-                </tr>
-                <tr data-setor="lajes corporativas">
-                  <td>lajes corporativas</td>
-                  <td class="right" data-valor-setor></td>
-                  <td class="right" data-pct-atual></td>
-                  <td class="right">
-                    <input type="number" value="10" step="0.1" min="0" max="100" />%
-                  </td>
-                  <td class="right" data-diferenca></td>
-                  <td class="right" data-falta></td>
-                </tr>
-                <tr data-setor="híbridos">
-                  <td>híbridos</td>
-                  <td class="right" data-valor-setor></td>
-                  <td class="right" data-pct-atual></td>
-                  <td class="right">
-                    <input type="number" value="10" step="0.1" min="0" max="100" />%
-                  </td>
-                  <td class="right" data-diferenca></td>
-                  <td class="right" data-falta></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="summary-row">
-            <span>Desvio total (módulo): <strong id="desvio-total"></strong></span>
-          </div>
-        </section>
-
-        <!-- Aporte -->
-        <section class="card mt-6">
-          <div class="card-header">
-            <div>
-              <h2>Aporte</h2>
-              <small>Distribuição ideal do aporte por setor.</small>
-            </div>
-            <div class="card-actions">
-              <button class="btn" onclick="calcularAporte()">
-                💰 Recalcular aporte
-              </button>
-            </div>
-          </div>
-
-          <div class="flex mt-4">
-            <label class="flex-grow small">
-              Investimento Disponível:
-              <input type="number" id="investimento-disponivel" value="1000" step="10" min="0" />
-            </label>
-            <span class="badge">
-              📌 Baseado em “Falta p/ Meta”
-            </span>
-          </div>
-
-          <div class="scroll-y mt-4">
-            <table id="tabela-aporte">
-              <thead>
-                <tr>
-                  <th>Setor</th>
-                  <th class="right">Falta p/ Meta</th>
-                  <th class="right">% Proporcional</th>
-                  <th class="right">Aporte Ideal</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr data-setor-aporte="papel">
-                  <td>papel</td>
-                  <td class="right" data-falta-aporte></td>
-                  <td class="right" data-pct-proporcional></td>
-                  <td class="right" data-aporte-ideal></td>
-                </tr>
-                <tr data-setor-aporte="logística">
-                  <td>logística</td>
-                  <td class="right" data-falta-aporte></td>
-                  <td class="right" data-pct-proporcional></td>
-                  <td class="right" data-aporte-ideal></td>
-                </tr>
-                <tr data-setor-aporte="shoppings">
-                  <td>shoppings</td>
-                  <td class="right" data-falta-aporte></td>
-                  <td class="right" data-pct-proporcional></td>
-                  <td class="right" data-aporte-ideal></td>
-                </tr>
-                <tr data-setor-aporte="lajes corporativas">
-                  <td>lajes corporativas</td>
-                  <td class="right" data-falta-aporte></td>
-                  <td class="right" data-pct-proporcional></td>
-                  <td class="right" data-aporte-ideal></td>
-                </tr>
-                <tr data-setor-aporte="híbridos">
-                  <td>híbridos</td>
-                  <td class="right" data-falta-aporte></td>
-                  <td class="right" data-pct-proporcional></td>
-                  <td class="right" data-aporte-ideal></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- Gráfico -->
-        <section class="card mt-6">
-          <div class="card-header">
-            <div>
-              <h2>Gráfico de Setores</h2>
-              <small>Distribuição atual da carteira por setor.</small>
-            </div>
-            <div class="card-actions">
-              <button class="btn btn-ghost" onclick="atualizarGraficoSetores()">
-                📊 Atualizar gráfico
-              </button>
-            </div>
-          </div>
-          <canvas id="chart-setores" height="180"></canvas>
-        </section>
-
-        <!-- Momento Compra -->
-        <section class="card mt-6">
-          <div class="card-header">
-            <div>
-              <h2>Momento de Compra</h2>
-              <small>Visão rápida de onde o aporte faz mais sentido.</small>
-            </div>
-          </div>
-          <div class="small">
-            Regra simples (que você pode evoluir depois):
-          </div>
-          <ul class="small mt-4">
-            <li><span class="tag-success">Verde</span>: setores com maior “Falta p/ Meta” e maior “Aporte Ideal”.</li>
-            <li><span class="tag-danger">Vermelho</span>: setores acima da meta (Diferença &lt; 0).</li>
-            <li><span class="tag-success">Sugestão:</span> priorize compras nos setores com maior “Aporte Ideal”.</li>
-          </ul>
-        </section>
+      <div class="tabs">
+        <button class="tab active" data-tab="carteira">Carteira</button>
+        <button class="tab" data-tab="dashboard">Dashboard</button>
+        <button class="tab" data-tab="compra">Compras</button>
+        <button class="tab" data-tab="config">Configurações</button>
+        <button class="tab" data-tab="juros">Juros</button>
+        <button class="tab" data-tab="ia">IA</button>
       </div>
     </div>
+
+    <section id="tab-carteira" class="grid">
+      <div class="card span-12">
+        <h2 class="txt-white">Distribuição alvo</h2>
+        <div class="note">Proporção fixa por classe: papel 40%, logística 25%, shoppings 15%, lajes corporativas 10% e híbridos 10%.</div>
+        <div id="targetBars" style="margin-top:12px"></div>
+      </div>
+
+      <div class="card span-6">
+        <h2 class="txt-white">Cadastrar ativo</h2>
+        <div class="form">
+          <div class="col-3"><input id="fTicker" placeholder="Ticker" /></div>
+          <div class="col-3"><input id="fSegmento" placeholder="Ramo" /></div>
+          <div class="col-3"><input id="fPreco" type="number" step="0.01" placeholder="Preço de compra" /></div>
+          <div class="col-3"><input id="fQtd" type="number" step="1" placeholder="Qtd cotas" /></div>
+          <div class="col-4"><input id="fPrecoAtual" type="number" step="0.01" placeholder="Preço atual" /></div>
+          <div class="col-4"><input id="fRendimentoUltimoMes" type="number" step="0.01" placeholder="Rendimento do último mês" /></div>
+          <div class="col-4"><input id="fDy" type="number" step="0.01" placeholder="DY %" /></div>
+          <div class="col-4"><button id="btnSaveAsset">Salvar ativo</button></div>
+          <div class="col-4"><button id="btnNewAsset" class="secondary">Novo ativo</button></div>
+        </div>
+        <div id="assetModeHint" class="note">Modo atual: novo cadastro.</div>
+      </div>
+
+      <div class="card span-12">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
+          <h2 style="margin:0" class="txt-white">Posição atual</h2>
+          <div class="modeSwitch">
+            <button id="viewSummary" class="active">Resumo</button>
+            <button id="viewDetail" class="secondary">Detalhado</button>
+            <button id="btnRefreshMarket" class="secondary">Atualizar dados</button>
+          </div>
+        </div>
+        <div class="scrollX">
+        <div class="table compact">
+          <div class="row head" id="assetHead">
+            <div data-sort="ticker">Ticker</div>
+            <div data-sort="segmento">Ramo</div>
+            <div class="right" data-sort="precoMedio">Preço médio</div>
+            <div class="right" data-sort="precoAtual">Preço mercado</div>
+            <div class="right" data-sort="pvp">P/VP</div>
+            <div class="right" data-sort="rendimentoUltimoMes">Rend. 1M</div>
+            <div class="right" data-sort="dy">DY</div>
+            <div class="right" data-sort="qtd">Qtd</div>
+            <div class="right" data-sort="peso">Peso</div>
+            <div class="right" data-sort="proporcaoRamo">Ramo%</div>
+            <div>Ações</div>
+          </div>
+          <div id="assetRows"></div>
+        </div>
+        </div>
+        <div id="assetGroups" style="margin-top:16px"></div>
+      </div>
+      </div>
+      <div class="card span-12">
+        <h2 class="txt-white">Acesso rápido</h2>
+        <div class="functionGrid" id="functionGrid"></div>
+      </div>
+    </section>
+
+    <section id="tab-config" class="grid hidden">
+      <div class="card span-12">
+        <h2 class="txt-white">Ajustes</h2>
+        <div class="form">
+          <div class="col-6"><input id="cashAvailable" type="number" step="0.01" placeholder="Capital disponível para investir" /></div>
+          <div class="col-6"><input id="monthlyGoal" type="number" step="0.01" placeholder="Meta mensal de aporte" /></div>
+          <div class="col-6"><input id="openaiModel" placeholder="Modelo OpenAI" value="gpt-4o-mini" /></div>
+          <div class="col-6"><input id="alertThreshold" type="number" step="0.1" placeholder="Alerta de desvio (%)" /></div>
+          <div class="col-6"><label class="pill" style="width:100%;justify-content:center;cursor:pointer"><input id="dailyMode" type="checkbox" style="margin-right:8px" />Visão diária</label></div>
+          <div class="col-6"><button id="btnSaveSettings" class="secondary">Salvar ajustes</button></div>
+          <div class="col-6"><button id="btnExportJson" class="secondary">Exportar JSON</button></div>
+          <div class="col-6"><label class="pill" style="width:100%;justify-content:center;cursor:pointer">
+            <input id="jsonFile" type="file" accept="application/json" style="display:none" />
+            Importar JSON
+          </label></div>
+          <div class="col-6"><label class="pill" style="width:100%;justify-content:center;cursor:pointer">
+            <input id="planilhaFile" type="file" accept=".csv,.tsv,.txt,.xlsx" style="display:none" />
+            Importar planilha
+          </label></div>
+          <div class="col-6"><button id="btnPickSaveFile" class="secondary">Escolher arquivo de salvamento</button></div>
+          <div class="col-6"><button id="btnSaveToFile" class="secondary">Salvar no arquivo</button></div>
+          <div class="col-6"><button id="btnSyncJson" class="secondary">Sincronizar JSON</button></div>
+          <div class="col-6"><button id="btnUpdateNow" class="secondary">Atualizar agora</button></div>
+        </div>
+        <div class="note">A OpenAI fica centralizada no backend PHP. O navegador só conversa com a sua API local.</div>
+      </div>
+      <div class="card span-12">
+        <h2 class="txt-white">Próximos recursos</h2>
+        <div class="ideas" id="suggestionCards"></div>
+      </div>
+      <div class="card span-12">
+        <h2 class="txt-white">Operações e proventos</h2>
+        <div class="grid2">
+          <div class="card" style="padding:12px">
+            <h3>Editar operações</h3>
+            <div id="operationEditor" class="mini">Edite ou exclua lançamentos anteriores pelo histórico.</div>
+          </div>
+          <div class="card" style="padding:12px">
+            <h3>Registrar proventos</h3>
+            <div class="form">
+              <div class="col-6"><input id="divTicker" placeholder="Ticker" /></div>
+              <div class="col-6"><input id="divDate" type="date" /></div>
+              <div class="col-6"><input id="divAmount" type="number" step="0.01" placeholder="Valor recebido" /></div>
+              <div class="col-6"><input id="divNote" placeholder="Observação" /></div>
+              <div class="col-12"><button id="btnAddDividend">Salvar provento</button></div>
+            </div>
+          </div>
+        </div>
+        <div id="dividendHistory" style="margin-top:12px"></div>
+      </div>
+      <div class="card span-12">
+        <h2 class="txt-white">Notas por ativo</h2>
+        <div class="form">
+          <div class="col-3"><input id="noteTicker" placeholder="Ticker" /></div>
+          <div class="col-9"><input id="noteText" placeholder="Tese, motivo da compra, revisão futura" /></div>
+          <div class="col-6"><button id="btnSaveNote" class="secondary">Salvar nota</button></div>
+        </div>
+        <div id="notesList" style="margin-top:12px"></div>
+      </div>
+    </section>
+
+    <section id="tab-dashboard" class="grid hidden">
+      <div class="card span-12 execCard">
+        <h2 class="txt-white">Visão geral</h2>
+        <div class="kpis">
+          <div class="kpi"><div class="k">Carteira</div><div id="kInvestidoTop" class="v">R$ 0,00</div></div>
+          <div class="kpi"><div class="k">Resultado</div><div id="kResultadoTop" class="v">R$ 0,00</div></div>
+          <div class="kpi"><div class="k">Caixa</div><div id="kCashTop" class="v">R$ 0,00</div></div>
+          <div class="kpi"><div class="k">Meta do mês</div><div id="kMonthlyGoalTop" class="v">R$ 0,00</div></div>
+        </div>
+      </div>
+      <div class="card span-12 execCard">
+        <h2 class="txt-white">Resumo da carteira</h2>
+        <div class="kpis">
+          <div class="kpi"><div class="k">Investido</div><div id="kInvestido" class="v">R$ 0,00</div></div>
+          <div class="kpi"><div class="k">Valor atual</div><div id="kAtual" class="v">R$ 0,00</div></div>
+          <div class="kpi"><div class="k">Resultado</div><div id="kResultado" class="v">R$ 0,00</div></div>
+          <div class="kpi"><div class="k">Disponível</div><div id="kCash" class="v">R$ 0,00</div></div>
+        </div>
+        <div class="kpis" style="margin-top:10px;grid-template-columns:repeat(3,1fr)">
+          <div class="kpi"><div class="k">Meta mensal</div><div id="kMonthlyGoal" class="v">R$ 0,00</div></div>
+          <div class="kpi"><div class="k">Meta usada</div><div id="kGoalUsed" class="v">0,00%</div></div>
+          <div class="kpi"><div class="k">Excedente</div><div id="kGoalDiff" class="v">R$ 0,00</div></div>
+        </div>
+      </div>
+      <div class="card span-6 execCard">
+        <h2 class="txt-white">Peso por ramo</h2>
+        <div id="segmentBars"></div>
+      </div>
+      <div class="card span-6 execCard">
+        <h2 class="txt-white">Desvio por ativo</h2>
+        <div id="driftList"></div>
+      </div>
+      <div class="card span-12 execCard">
+        <h2 class="txt-white">Rentabilidade consolidada</h2>
+        <div class="kpis" style="grid-template-columns:repeat(4,1fr)">
+          <div class="kpi"><div class="k">Aportes</div><div id="kAportes" class="v">R$ 0,00</div></div>
+          <div class="kpi"><div class="k">Vendas</div><div id="kVendas" class="v">R$ 0,00</div></div>
+          <div class="kpi"><div class="k">Proventos</div><div id="kProventos" class="v">R$ 0,00</div></div>
+          <div class="kpi"><div class="k">Rentab. total</div><div id="kRentabTotal" class="v">R$ 0,00</div></div>
+        </div>
+        <div id="profitabilityPanel" style="margin-top:12px"></div>
+      </div>
+      <div class="card span-12 execCard">
+        <h2 class="txt-white">Acumulado mensal</h2>
+        <canvas id="monthlyChart" width="1000" height="240" style="width:100%;background:rgba(0,0,0,.12);border:1px solid var(--line);border-radius:14px"></canvas>
+      </div>
+      <div class="card span-12 execCard">
+        <h2 class="txt-white">Ranking de prioridade e filtros</h2>
+        <div id="bestBuySummary" class="pill" style="margin-bottom:10px">Melhor compra do dia: aguardando cálculo</div>
+        <div class="form">
+          <div class="col-3"><select id="filterSegment"><option value="">Todos os ramos</option><option>FII de papel</option><option>FII de logística</option><option>FII de shoppings</option><option>FII de lajes corporativas</option><option>FII fundos híbridos</option></select></div>
+          <div class="col-3"><input id="filterMinDy" type="number" step="0.01" placeholder="DY mínimo" /></div>
+          <div class="col-3"><input id="filterMaxPvp" type="number" step="0.01" placeholder="P/VP máximo" /></div>
+          <div class="col-3"><input id="filterSearch" placeholder="Buscar ticker" /></div>
+          <div class="col-3"><input id="filterMinPrice" type="number" step="0.01" placeholder="Preço mínimo" /></div>
+          <div class="col-3"><input id="filterMaxPrice" type="number" step="0.01" placeholder="Preço máximo" /></div>
+          <div class="col-3"><input id="filterMaxConcentration" type="number" step="0.01" placeholder="Concentração ramo máx. %" /></div>
+          <div class="col-12"><button id="btnApplyFilters" class="secondary">Aplicar filtros</button><button id="btnClearFilters" class="secondary" style="margin-left:8px">Limpar</button></div>
+        </div>
+        <div class="modeSwitch" style="margin-top:10px">
+          <button id="rankCompact" class="active">Compacto</button>
+          <button id="rankDetail" class="secondary">Detalhado</button>
+        </div>
+        <div class="grid2" style="margin-top:12px">
+          <div>
+            <h3>Ranking de prioridade</h3>
+            <div id="priorityRank" class="mini"></div>
+          </div>
+          <div>
+            <h3>Resumo dos filtros</h3>
+            <div id="filterSummary" class="mini"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card span-12 execCard">
+        <h2 class="txt-white">Painel de risco</h2>
+        <div id="riskPanel"></div>
+      </div>
+    </section>
+
+    <section id="tab-compra" class="grid hidden">
+      <div class="card span-6">
+        <h2 class="txt-white">Sugestão de compra</h2>
+        <div class="form">
+          <div class="col-6"><input id="buyCash" type="number" step="0.01" placeholder="Quanto quer investir agora" /></div>
+          <div class="col-6"><button id="btnSuggestBuy">Calcular compra ideal</button></div>
+        </div>
+        <div id="buyResult" class="mini" style="margin-top:12px"></div>
+      </div>
+      <div class="card span-6">
+        <h2 class="txt-white">Rebalanceamento rápido</h2>
+        <div class="note">A lógica tenta comprar os ativos mais abaixo do peso-alvo, respeitando o dinheiro informado e o preço atual.</div>
+        <div class="pill" style="margin-top:10px">Prioridade: maior desvio negativo</div>
+      </div>
+    </section>
+
+    <section id="tab-ia" class="grid hidden">
+      <div class="card span-12">
+        <h2 class="txt-white">Análise com OpenAI</h2>
+        <div class="grid2">
+          <div>
+            <div class="note">A IA recebe sua carteira, os pesos alvo, o caixa disponível e a lista de candidatos para sugerir a melhor compra. Para preservar privacidade, a chamada é feita direto no navegador, usando a chave que você informar.</div>
+            <div class="form" style="margin-top:10px">
+              <div class="col-6"><button id="btnAiAnalyze">Analisar melhor compra</button></div>
+              <div class="col-6"><button id="btnAiSegment" class="secondary">Resumo de risco da carteira</button></div>
+            </div>
+          </div>
+          <div>
+            <textarea id="aiOutput" rows="12" placeholder="A resposta da IA aparece aqui..."></textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-juros" class="grid hidden">
+      <div class="card span-6">
+        <h2 class="txt-white">Calculadora de Juros Compostos</h2>
+        <div class="form">
+          <div class="col-6"><input id="jcPrincipal" type="number" step="0.01" placeholder="Valor inicial" /></div>
+          <div class="col-6"><input id="jcAporte" type="number" step="0.01" placeholder="Aporte mensal" /></div>
+          <div class="col-4"><input id="jcTaxa" type="number" step="0.01" placeholder="Taxa (%)" /></div>
+          <div class="col-4"><select id="jcTaxaTipo"><option value="mes">mensal</option><option value="dia">diária</option><option value="ano">anual</option></select></div>
+          <div class="col-6"><input id="jcMeses" type="number" step="1" placeholder="Quantidade de meses" /></div>
+          <div class="col-12"><button id="btnCalcJuros">Calcular</button></div>
+        </div>
+        <div class="note" style="margin-top:10px">A calculadora considera aportes mensais no fim de cada mês.</div>
+      </div>
+      <div class="card span-6">
+        <h2 class="txt-white">Resultado</h2>
+        <div class="kpis" style="grid-template-columns:repeat(2,1fr)">
+          <div class="kpi"><div class="k">Total aportado</div><div id="jcTotalAportado" class="v">R$ 0,00</div></div>
+          <div class="kpi"><div class="k">Montante final</div><div id="jcMontanteFinal" class="v">R$ 0,00</div></div>
+          <div class="kpi"><div class="k">Lucro</div><div id="jcLucro" class="v">R$ 0,00</div></div>
+          <div class="kpi"><div class="k">Rendimento</div><div id="jcRendimento" class="v">0,00%</div></div>
+        </div>
+        <canvas id="jcChart" width="520" height="220" style="width:100%;margin-top:12px;background:rgba(0,0,0,.12);border:1px solid var(--line);border-radius:14px"></canvas>
+        <div id="jcDetalhe" class="mini" style="margin-top:12px"></div>
+      </div>
+      <div class="card span-12">
+        <h2 class="txt-white">Comparação de cenários</h2>
+        <div class="grid2">
+          <div class="card" style="padding:14px">
+            <h3>Cenário A</h3>
+            <div class="form">
+              <div class="col-6"><input id="aPrincipal" type="number" step="0.01" placeholder="Valor inicial" /></div>
+              <div class="col-6"><input id="aAporte" type="number" step="0.01" placeholder="Aporte" /></div>
+              <div class="col-6"><input id="aTaxa" type="number" step="0.01" placeholder="Taxa (%)" /></div>
+              <div class="col-6"><input id="aMeses" type="number" step="1" placeholder="Meses" /></div>
+            </div>
+          </div>
+          <div class="card" style="padding:14px">
+            <h3>Cenário B</h3>
+            <div class="form">
+              <div class="col-6"><input id="bPrincipal" type="number" step="0.01" placeholder="Valor inicial" /></div>
+              <div class="col-6"><input id="bAporte" type="number" step="0.01" placeholder="Aporte" /></div>
+              <div class="col-6"><input id="bTaxa" type="number" step="0.01" placeholder="Taxa (%)" /></div>
+              <div class="col-6"><input id="bMeses" type="number" step="1" placeholder="Meses" /></div>
+            </div>
+          </div>
+          <div class="col-12"><button id="btnCompareScenarios">Comparar cenários</button></div>
+        </div>
+        <div id="scenarioResult" class="mini" style="margin-top:12px"></div>
+      </div>
+    </section>
   </div>
 
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <script>
-    // ---------- UTILITÁRIOS ----------
-    function formatNumber(num) {
-      if (isNaN(num)) return '';
-      return num.toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
+    const LS = {
+      assets: "fii.assets.v1",
+      settings: "fii.settings.v1",
+      operations: "fii.operations.v1",
+      dividends: "fii.dividends.v1",
+      notes: "fii.notes.v1",
+      backup: "fii.backup.v1",
+    };
+    const $ = (id) => document.getElementById(id);
+    const brl = (n) => new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(Number(n||0));
+    const pct = (n) => `${Number(n||0).toFixed(2)}%`;
+    const num = (v) => {
+      if (typeof v === "number") return v;
+      if (!v) return 0;
+      return Number(String(v).replace(/\./g,"").replace(",",".").replace(/[^\d.-]/g,"")) || 0;
+    };
+    const TARGETS = [
+      { segmento: "FII de papel", peso: 40 },
+      { segmento: "FII de logística", peso: 25 },
+      { segmento: "FII de shoppings", peso: 15 },
+      { segmento: "FII de lajes corporativas", peso: 10 },
+      { segmento: "FII fundos híbridos", peso: 10 }
+    ];
+
+    const state = { assets: [], operations: [], dividends: [], notes: {}, settings: { cashAvailable: 0, monthlyGoal: 0, alertThreshold: 2, openaiModel: "gpt-4o-mini", dailyMode: false }, sortKey: "ticker", sortDir: "asc", fileHandle: null, viewMode: "summary", rankView: "compact", filters: { segment: "", minDy: "", maxPvp: "", search: "", minPrice: "", maxPrice: "", maxConcentration: "" } };
+    const suggestionItems = [
+      { name: "Alertas de rebalanceamento", desc: "Avisar quando um ativo sair muito do peso-alvo ou quando um ramo ficar sobrecarregado." },
+      { name: "Histórico de compras", desc: "Registrar cada aporte, preço, data e motivo da operação para auditoria pessoal." },
+      { name: "Calendário de rendimentos", desc: "Mostrar os próximos proventos esperados por ativo e por mês." },
+      { name: "Meta de aporte mensal", desc: "Comparar quanto foi investido no mês com a meta definida por você." },
+      { name: "Rentabilidade consolidada", desc: "Calcular ganho total, dividendos recebidos e rentabilidade por ramo e por ativo." },
+      { name: "Importação automática", desc: "Puxar a carteira de uma planilha ou arquivo JSON com validação de dados." },
+      { name: "Modo acompanhamento", desc: "Mostrar ativos sem atualização recente e destacar os que precisam revisão." },
+      { name: "Resumo executivo", desc: "Uma tela única com os principais indicadores para consulta rápida diária." }
+    ];
+
+    const demoAssets = [
+      { ticker:"KNCR11", segmento:"FII de papel", compra:105.10, qtd:20, precoMedio:105.10, rendimentoUltimoMes:1.05, dy:13.30, precoAtual:105.54, pvp:0.98 },
+      { ticker:"RBRR11", segmento:"FII de papel", compra:89.40, qtd:18, precoMedio:89.40, rendimentoUltimoMes:0.92, dy:12.40, precoAtual:89.88, pvp:0.97 },
+      { ticker:"MCCI11", segmento:"FII de papel", compra:89.85, qtd:18, precoMedio:89.85, rendimentoUltimoMes:0.86, dy:11.95, precoAtual:90.12, pvp:0.99 },
+      { ticker:"CPTS11", segmento:"FII de papel", compra:9.20, qtd:150, precoMedio:9.20, rendimentoUltimoMes:0.09, dy:13.20, precoAtual:9.28, pvp:0.92 },
+      { ticker:"HGCR11", segmento:"FII de papel", compra:98.61, qtd:16, precoMedio:98.61, rendimentoUltimoMes:0.95, dy:12.43, precoAtual:98.95, pvp:0.99 },
+      { ticker:"BTLG11", segmento:"FII de logística", compra:103.35, qtd:12, precoMedio:103.35, rendimentoUltimoMes:0.81, dy:9.15, precoAtual:103.88, pvp:1.01 },
+      { ticker:"HGLG11", segmento:"FII de logística", compra:156.23, qtd:10, precoMedio:156.23, rendimentoUltimoMes:0.82, dy:7.45, precoAtual:158.10, pvp:0.94 },
+      { ticker:"BRCO11", segmento:"FII de logística", compra:117.98, qtd:10, precoMedio:117.98, rendimentoUltimoMes:0.92, dy:9.11, precoAtual:118.35, pvp:1.01 },
+      { ticker:"XPLG11", segmento:"FII de logística", compra:102.70, qtd:12, precoMedio:102.70, rendimentoUltimoMes:0.77, dy:8.80, precoAtual:103.05, pvp:1.00 },
+      { ticker:"XPML11", segmento:"FII de shoppings", compra:98.70, qtd:12, precoMedio:98.70, rendimentoUltimoMes:0.71, dy:8.95, precoAtual:99.10, pvp:1.02 },
+      { ticker:"HGBS11", segmento:"FII de shoppings", compra:20.77, qtd:30, precoMedio:20.77, rendimentoUltimoMes:0.17, dy:9.18, precoAtual:20.92, pvp:1.01 },
+      { ticker:"PVBI11", segmento:"FII de lajes corporativas", compra:74.30, qtd:14, precoMedio:74.30, rendimentoUltimoMes:0.48, dy:7.60, precoAtual:74.55, pvp:0.88 },
+      { ticker:"HGRE11", segmento:"FII de lajes corporativas", compra:129.82, qtd:10, precoMedio:129.82, rendimentoUltimoMes:0.70, dy:7.90, precoAtual:128.40, pvp:0.87 },
+      { ticker:"HFOF11", segmento:"FII fundos híbridos", compra:7.25, qtd:200, precoMedio:7.25, rendimentoUltimoMes:0.06, dy:8.40, precoAtual:7.29, pvp:0.99 },
+      { ticker:"KNRI11", segmento:"FII fundos híbridos", compra:138.55, qtd:10, precoMedio:138.55, rendimentoUltimoMes:1.02, dy:8.95, precoAtual:139.20, pvp:1.03 }
+    ];
+
+    function saveAll() {
+      localStorage.setItem(LS.assets, JSON.stringify(state.assets));
+      localStorage.setItem(LS.settings, JSON.stringify(state.settings));
+      localStorage.setItem(LS.operations, JSON.stringify(state.operations));
+      localStorage.setItem(LS.dividends, JSON.stringify(state.dividends));
+      localStorage.setItem(LS.notes, JSON.stringify(state.notes));
     }
-
-    function parseNumber(str) {
-      if (typeof str === 'number') return str;
-      if (!str) return 0;
-      return parseFloat(
-        String(str)
-          .replace(/\s/g, '')
-          .replace(/\./g, '')
-          .replace(',', '.')
-      ) || 0;
+    function loadAll() {
+      state.assets = JSON.parse(localStorage.getItem(LS.assets) || "[]");
+      state.settings = Object.assign(state.settings, JSON.parse(localStorage.getItem(LS.settings) || "{}"));
+      state.operations = JSON.parse(localStorage.getItem(LS.operations) || "[]").map(op => ({ id: op.id || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random())), at: op.at || new Date().toISOString(), ...op }));
+      state.dividends = JSON.parse(localStorage.getItem(LS.dividends) || "[]").map(d => ({ id: d.id || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random())), at: d.at || new Date().toISOString(), ...d }));
+      state.notes = JSON.parse(localStorage.getItem(LS.notes) || "{}");
+      $("cashAvailable").value = state.settings.cashAvailable || "";
+      $("monthlyGoal").value = state.settings.monthlyGoal || "";
+      $("alertThreshold").value = state.settings.alertThreshold ?? 2;
+      $("openaiModel").value = state.settings.openaiModel || "gpt-4o-mini";
+      $("dailyMode").checked = !!state.settings.dailyMode;
+      $("buyCash").value = state.settings.cashAvailable || "";
     }
-
-    // ---------- FIIs & COMPRAS ----------
-    function obterMapaCompras() {
-      const tabelaCompras = document.getElementById('tabela-compras').querySelector('tbody');
-      const mapa = {};
-      Array.from(tabelaCompras.rows).forEach(row => {
-        const ativo = row.querySelector('[data-compra-ativo]').value;
-        const qtd = parseNumber(row.querySelector('[data-compra-qtd]').value);
-        const preco = parseNumber(row.querySelector('[data-compra-preco]').value);
-        const valor = qtd * preco;
-
-        if (!mapa[ativo]) {
-          mapa[ativo] = { qtd: 0, valor: 0 };
+    function normalizeSegment(segmento) {
+      const s = String(segmento || "").toLowerCase();
+      if (s.includes("papel")) return "FII de papel";
+      if (s.includes("log")) return "FII de logística";
+      if (s.includes("shopping")) return "FII de shoppings";
+      if (s.includes("laje") || s.includes("corpor")) return "FII de lajes corporativas";
+      if (s.includes("híbr") || s.includes("hibr")) return "FII fundos híbridos";
+      return segmento || "FII fundos híbridos";
+    }
+    function inferSegment(ticker, gestao) {
+      const t = String(ticker || "").toUpperCase();
+      if (["HGLG","BTLG","BRCO","GGRC","BTLG","LVBI","VILG","TRBL"].some(x => t.startsWith(x))) return "FII de logística";
+      if (["HGBS","HSML","VISC","XPML","MALL","FVPQ"].some(x => t.startsWith(x))) return "FII de shoppings";
+      if (["HGRE","RECT","PVBI","BROF","RBRP"].some(x => t.startsWith(x))) return "FII de lajes corporativas";
+      if (["KNCR","KNRI","MXRF","CPTS","IRDM","VRTA","RBRY","VGHF","TRXF"].some(x => t.startsWith(x))) return "FII fundos híbridos";
+      if (["RBRL","HFOF","BCFF","FIIX","GARE","RBFF"].some(x => t.startsWith(x))) return "FII de papel";
+      if (gestao) return normalizeSegment(gestao);
+      return "FII fundos híbridos";
+    }
+    function targetBySegment(segmento) {
+      return (TARGETS.find(t => t.segmento === segmento) || { peso: 0 }).peso;
+    }
+    function totalInvested() { return state.assets.reduce((s,a)=>s + num(a.compra)*num(a.qtd), 0); }
+    function totalCurrent() { return state.assets.reduce((s,a)=>s + (num(a.precoAtual)||num(a.compra))*num(a.qtd), 0); }
+    function avgCostByTicker(ticker) {
+      const ops = state.operations.filter(op => op.ticker === ticker);
+      let qty = 0;
+      let total = 0;
+      for (const op of ops) {
+        if (op.type === "buy") {
+          qty += num(op.qty);
+          total += num(op.qty) * num(op.price);
+        } else if (op.type === "sell") {
+          const avg = qty > 0 ? total / qty : 0;
+          const soldQty = Math.min(qty, num(op.qty));
+          qty -= soldQty;
+          total -= soldQty * avg;
         }
-        mapa[ativo].qtd += qtd;
-        mapa[ativo].valor += valor;
-
-        // Atualiza célula de valor da própria linha
-        row.querySelector('[data-compra-valor]').textContent = formatNumber(valor);
-      });
-      return mapa;
-    }
-
-    function recalcularFiis() {
-      const tabelaFiis = document.getElementById('tabela-fiis').querySelector('tbody');
-      const mapaCompras = obterMapaCompras();
-
-      let totalCarteira = 0;
-      let totalAtivos = 0;
-
-      Array.from(tabelaFiis.rows).forEach(row => {
-        const ativo = row.getAttribute('data-ativo');
-        const qtdAtualInput = row.cells[2].querySelector('input');
-        const precoAtualInput = row.cells[3].querySelector('input');
-
-        const qtdAtual = parseNumber(qtdAtualInput.value);
-        const precoAtual = parseNumber(precoAtualInput.value);
-
-        const dadosCompra = mapaCompras[ativo] || { qtd: 0, valor: 0 };
-        const qtdComprada = dadosCompra.qtd;
-        const valorCompras = dadosCompra.valor;
-
-        const qtdTotal = qtdAtual + qtdComprada;
-
-        // Valor total investido (considerando preço atual para a posição antiga + compras)
-        const valorPosicaoAntiga = qtdAtual * precoAtual;
-        const valorTotalInvestido = valorPosicaoAntiga + valorCompras;
-
-        const precoMedio = qtdTotal > 0 ? valorTotalInvestido / qtdTotal : 0;
-        const posicaoAtual = qtdTotal * precoAtual;
-
-        row.querySelector('[data-qtd-comprada]').textContent = formatNumber(qtdComprada);
-        row.querySelector('[data-qtd-total]').textContent = formatNumber(qtdTotal);
-        row.querySelector('[data-valor-total]').textContent = formatNumber(valorTotalInvestido);
-        row.querySelector('[data-preco-medio]').textContent = formatNumber(precoMedio);
-        row.querySelector('[data-posicao-atual]').textContent = formatNumber(posicaoAtual);
-
-        totalCarteira += posicaoAtual;
-        if (qtdTotal > 0) totalAtivos += 1;
-      });
-
-      document.getElementById('total-carteira').textContent = formatNumber(totalCarteira);
-      document.getElementById('total-ativos').textContent = totalAtivos;
-
-      const ticketMedio = totalAtivos > 0 ? totalCarteira / totalAtivos : 0;
-      document.getElementById('ticket-medio').textContent = formatNumber(ticketMedio);
-
-      return totalCarteira;
-    }
-
-    function adicionarCompraLinha() {
-      const tabelaComprasBody = document.getElementById('tabela-compras').querySelector('tbody');
-      const tabelaFiis = document.getElementById('tabela-fiis').querySelector('tbody');
-
-      const row = tabelaComprasBody.insertRow();
-
-      // Data
-      const cellData = row.insertCell();
-      const inputData = document.createElement('input');
-      inputData.type = 'date';
-      inputData.valueAsDate = new Date();
-      cellData.appendChild(inputData);
-
-      // Ativo
-      const cellAtivo = row.insertCell();
-      const selectAtivo = document.createElement('select');
-      selectAtivo.setAttribute('data-compra-ativo', '');
-      Array.from(tabelaFiis.rows).forEach(r => {
-        const ativo = r.getAttribute('data-ativo');
-        const opt = document.createElement('option');
-        opt.value = ativo;
-        opt.textContent = ativo;
-        selectAtivo.appendChild(opt);
-      });
-      cellAtivo.appendChild(selectAtivo);
-
-      // Qtde
-      const cellQtd = row.insertCell();
-      const inputQtd = document.createElement('input');
-      inputQtd.type = 'number';
-      inputQtd.step = '1';
-      inputQtd.min = '0';
-      inputQtd.value = '1';
-      inputQtd.setAttribute('data-compra-qtd', '');
-      cellQtd.classList.add('right');
-      cellQtd.appendChild(inputQtd);
-
-      // Preço
-      const cellPreco = row.insertCell();
-      const inputPreco = document.createElement('input');
-      inputPreco.type = 'number';
-      inputPreco.step = '0.01';
-      inputPreco.min = '0';
-      inputPreco.value = '10';
-      inputPreco.setAttribute('data-compra-preco', '');
-      cellPreco.classList.add('right');
-      cellPreco.appendChild(inputPreco);
-
-      // Valor
-      const cellValor = row.insertCell();
-      cellValor.classList.add('right');
-      const spanValor = document.createElement('span');
-      spanValor.setAttribute('data-compra-valor', '');
-      cellValor.appendChild(spanValor);
-
-      // Remover
-      const cellRemover = row.insertCell();
-      const btnRemover = document.createElement('button');
-      btnRemover.type = 'button';
-      btnRemover.className = 'btn btn-ghost';
-      btnRemover.textContent = '✖';
-      btnRemover.onclick = () => {
-        row.remove();
-        recalcularTudo();
-      };
-      cellRemover.appendChild(btnRemover);
-
-      // Eventos para recalcular
-      [inputQtd, inputPreco, selectAtivo, inputData].forEach(el => {
-        el.addEventListener('input', () => recalcularTudo());
-      });
-
-      recalcularTudo();
-    }
-
-    function limparCompras() {
-      const tabelaComprasBody = document.getElementById('tabela-compras').querySelector('tbody');
-      tabelaComprasBody.innerHTML = '';
-      recalcularTudo();
-    }
-
-    // ---------- SETORES & APORTE ----------
-    function recalcularSetores(totalCarteira) {
-      const tabelaFiis = document.getElementById('tabela-fiis').querySelector('tbody');
-      const tabelaSetores = document.getElementById('tabela-setores').querySelector('tbody');
-
-      const somaSetores = {};
-      Array.from(tabelaFiis.rows).forEach(row => {
-        const setor = row.getAttribute('data-setor');
-        const posicaoText = row.querySelector('[data-posicao-atual]').textContent;
-        const posicao = parseNumber(posicaoText);
-        if (!somaSetores[setor]) somaSetores[setor] = 0;
-        somaSetores[setor] += posicao;
-      });
-
-      let desvioTotal = 0;
-
-      Array.from(tabelaSetores.rows).forEach(row => {
-        const setor = row.getAttribute('data-setor');
-        const valorSetor = somaSetores[setor] || 0;
-
-        const valorCell = row.querySelector('[data-valor-setor]');
-        const pctAtualCell = row.querySelector('[data-pct-atual]');
-        const metaInput = row.cells[3].querySelector('input');
-        const diferencaCell = row.querySelector('[data-diferenca]');
-        const faltaCell = row.querySelector('[data-falta]');
-
-        valorCell.textContent = formatNumber(valorSetor);
-
-        let pctAtual = 0;
-        if (totalCarteira > 0) {
-          pctAtual = (valorSetor / totalCarteira) * 100;
-        }
-        pctAtualCell.textContent = formatNumber(pctAtual) + ' %';
-
-        const pctMeta = parseNumber(metaInput.value);
-        const diferenca = pctMeta - pctAtual;
-        diferencaCell.textContent = formatNumber(diferenca) + ' %';
-
-        const falta = Math.max(0, diferenca);
-        faltaCell.textContent = formatNumber(falta) + ' %';
-
-        desvioTotal += Math.abs(diferenca);
-      });
-
-      document.getElementById('desvio-total').textContent = formatNumber(desvioTotal) + ' %';
-    }
-
-    function calcularAporte() {
-      const investimento = parseNumber(document.getElementById('investimento-disponivel').value);
-      const tabelaSetores = document.getElementById('tabela-setores').querySelector('tbody');
-      const tabelaAporte = document.getElementById('tabela-aporte').querySelector('tbody');
-
-      const faltaPorSetor = {};
-      let somaFalta = 0;
-
-      Array.from(tabelaSetores.rows).forEach(row => {
-        const setor = row.getAttribute('data-setor');
-        const faltaText = row.querySelector('[data-falta]').textContent.replace('%', '');
-        const falta = parseNumber(faltaText);
-        faltaPorSetor[setor] = falta;
-        somaFalta += falta;
-      });
-
-      Array.from(tabelaAporte.rows).forEach(row => {
-        const setor = row.getAttribute('data-setor-aporte');
-        const faltaCell = row.querySelector('[data-falta-aporte]');
-        const pctPropCell = row.querySelector('[data-pct-proporcional]');
-        const aporteCell = row.querySelector('[data-aporte-ideal]');
-
-        const falta = faltaPorSetor[setor] || 0;
-        faltaCell.textContent = formatNumber(falta) + ' %';
-
-        let pctProporcional = 0;
-        let aporteIdeal = 0;
-
-        if (somaFalta > 0 && investimento > 0) {
-          pctProporcional = (falta / somaFalta) * 100;
-          aporteIdeal = (falta / somaFalta) * investimento;
-        }
-
-        pctPropCell.textContent = formatNumber(pctProporcional) + ' %';
-        aporteCell.textContent = 'R$ ' + formatNumber(aporteIdeal);
-      });
-    }
-
-    // ---------- GRÁFICO ----------
-    let chartSetores = null;
-
-    function atualizarGraficoSetores() {
-      const tabelaSetores = document.getElementById('tabela-setores').querySelector('tbody');
-      const labels = [];
-      const valores = [];
-
-      Array.from(tabelaSetores.rows).forEach(row => {
-        const setor = row.getAttribute('data-setor');
-        const valorText = row.querySelector('[data-valor-setor]').textContent;
-        const valor = parseNumber(valorText);
-        if (valor > 0) {
-          labels.push(setor);
-          valores.push(valor);
-        }
-      });
-
-      const ctx = document.getElementById('chart-setores').getContext('2d');
-
-      if (chartSetores) {
-        chartSetores.destroy();
       }
-
-      chartSetores = new Chart(ctx, {
-        type: 'pie',
-        data: {
-          labels,
-          datasets: [{
-            data: valores,
-            backgroundColor: [
-              '#38bdf8',
-              '#22c55e',
-              '#f97316',
-              '#a855f7',
-              '#facc15'
-            ],
-            borderColor: '#020617',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          plugins: {
-            legend: {
-              labels: {
-                color: '#e5e7eb',
-                font: { size: 11 }
-              }
-            }
-          }
+      return qty > 0 ? total / qty : 0;
+    }
+    function positionByTicker(ticker) {
+      const ops = state.operations.filter(op => op.ticker === ticker);
+      let qty = 0;
+      let totalBuy = 0;
+      let totalSell = 0;
+      for (const op of ops) {
+        if (op.type === "buy") {
+          qty += num(op.qty);
+          totalBuy += num(op.qty) * num(op.price);
+        } else if (op.type === "sell") {
+          qty -= num(op.qty);
+          totalSell += num(op.qty) * num(op.price);
+        }
+      }
+      return { qty: Math.max(0, qty), totalBuy, totalSell, avg: avgCostByTicker(ticker) };
+    }
+    function addOperation(type, ticker, qty, price, note) {
+      state.operations.unshift({
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
+        type,
+        ticker,
+        qty: num(qty),
+        price: num(price),
+        note: note || "",
+        at: new Date().toISOString()
+      });
+      saveAll();
+      renderOperationHistory();
+    }
+    function addDividend(ticker, amount, note, date) {
+      if (!ticker) return alert("Informe o ticker do provento.");
+      const value = num(amount);
+      if (!value) return alert("Informe o valor recebido.");
+      state.dividends.unshift({
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
+        ticker: ticker.trim().toUpperCase(),
+        amount: value,
+        note: note || "",
+        date: date || new Date().toISOString().slice(0, 10),
+        at: new Date().toISOString()
+      });
+      saveAll();
+      renderDividendPanel();
+      renderDashboard();
+    }
+    function updateOperationById(id, patch) {
+      const idx = state.operations.findIndex(op => op.id === id);
+      if (idx < 0) return;
+      state.operations[idx] = { ...state.operations[idx], ...patch };
+      saveAll();
+      refresh();
+    }
+    function deleteOperationById(id) {
+      state.operations = state.operations.filter(op => op.id !== id);
+      saveAll();
+      refresh();
+    }
+    function holdingsBySegment() {
+      const map = {};
+      for (const a of state.assets) {
+        const seg = a.segmento || "Outros";
+        map[seg] ||= { invested:0, current:0, target:0, count:0 };
+        map[seg].invested += num(a.compra)*num(a.qtd);
+        map[seg].current += (num(a.precoAtual)||num(a.compra))*num(a.qtd);
+        map[seg].target = targetBySegment(seg);
+        map[seg].count++;
+      }
+      return map;
+    }
+    function sortedAssets() {
+      const items = [...filteredAssets()];
+      const dir = state.sortDir === "asc" ? 1 : -1;
+      items.sort((a, b) => {
+        const av = sortValue(a, state.sortKey);
+        const bv = sortValue(b, state.sortKey);
+        if (av < bv) return -1 * dir;
+        if (av > bv) return 1 * dir;
+        return 0;
+      });
+      return items;
+    }
+    function sortValue(a, key) {
+      const invested = totalInvested();
+      const assetInvested = num(a.compra) * num(a.qtd);
+      const weight = invested ? assetInvested / invested * 100 : 0;
+      const ramoTotal = state.assets.filter(x => x.segmento === a.segmento).reduce((s, x) => s + num(x.compra) * num(x.qtd), 0);
+      const ramoShare = invested ? ramoTotal / invested * 100 : 0;
+      const map = {
+        ticker: a.ticker || "",
+        segmento: a.segmento || "",
+        precoMedio: num(a.precoMedio || a.compra),
+        precoAtual: num(a.precoAtual || a.compra),
+        pvp: num(a.pvp),
+        rendimentoUltimoMes: num(a.rendimentoUltimoMes),
+        dy: num(a.dy),
+        qtd: num(a.qtd),
+        peso: weight,
+        proporcaoRamo: ramoShare
+      };
+      return map[key] ?? "";
+    }
+    function filteredAssets() {
+      const invested = totalInvested();
+      return state.assets.filter(a => {
+        const segmentOk = !state.filters.segment || a.segmento === state.filters.segment;
+        const dyOk = !state.filters.minDy || num(a.dy) >= num(state.filters.minDy);
+        const pvpOk = !state.filters.maxPvp || num(a.pvp) <= num(state.filters.maxPvp);
+        const minPriceOk = !state.filters.minPrice || (num(a.precoAtual) || num(a.compra)) >= num(state.filters.minPrice);
+        const maxPriceOk = !state.filters.maxPrice || (num(a.precoAtual) || num(a.compra)) <= num(state.filters.maxPrice);
+        const ramoShare = invested ? state.assets.filter(x => x.segmento === a.segmento).reduce((s, x) => s + num(x.compra) * num(x.qtd), 0) / invested * 100 : 0;
+        const concentrationOk = !state.filters.maxConcentration || ramoShare <= num(state.filters.maxConcentration);
+        const search = String(state.filters.search || "").trim().toUpperCase();
+        const searchOk = !search || String(a.ticker || "").includes(search);
+        return segmentOk && dyOk && pvpOk && minPriceOk && maxPriceOk && concentrationOk && searchOk;
+      });
+    }
+    function updateSortMark() {
+      document.querySelectorAll("#assetHead [data-sort]").forEach(el => {
+        const base = el.childNodes[0]?.textContent || el.textContent;
+        el.innerHTML = base;
+        if (el.dataset.sort === state.sortKey) {
+          const mark = document.createElement("span");
+          mark.className = "sortMark";
+          mark.textContent = state.sortDir === "asc" ? "▲" : "▼";
+          el.appendChild(mark);
         }
       });
     }
-
-    // ---------- ORQUESTRAÇÃO ----------
-    function recalcularTudo() {
-      const total = recalcularFiis();
-      recalcularSetores(total);
-      calcularAporte();
-      atualizarGraficoSetores();
-    }
-
-    // Eventos de mudança nos inputs de FIIs e metas de setores
-    function registrarEventos() {
-      const tabelaFiis = document.getElementById('tabela-fiis').querySelector('tbody');
-      Array.from(tabelaFiis.querySelectorAll('input')).forEach(input => {
-        input.addEventListener('input', () => recalcularTudo());
+    function renderAssets() {
+      const el = $("assetRows"); el.innerHTML = "";
+      sortedAssets().forEach((a, idx) => {
+        const invested = num(a.compra)*num(a.qtd);
+        const current = (num(a.precoAtual)||num(a.compra))*num(a.qtd);
+        const weight = totalInvested() ? invested / totalInvested() * 100 : 0;
+        const pos = positionByTicker(a.ticker);
+        const avgReal = pos.avg || num(a.precoMedio || a.compra);
+        const ramoTotal = state.assets.filter(x => x.segmento === a.segmento).reduce((s, x) => s + num(x.compra) * num(x.qtd), 0);
+        const ramoShare = totalInvested() ? ramoTotal / totalInvested() * 100 : 0;
+        const row = document.createElement("div"); row.className = "row";
+        row.innerHTML = `
+          <div><b>${a.ticker}</b><div class="note">${a.segmento || ""}</div></div>
+          <div>${a.segmento || ""}</div>
+          <div style="text-align:right">${brl(avgReal)}</div>
+          <div style="text-align:right">${brl(num(a.precoAtual || a.compra))}</div>
+          <div style="text-align:right">${num(a.pvp || 0).toFixed(2)}</div>
+          <div style="text-align:right">${brl(num(a.rendimentoUltimoMes))}</div>
+          <div style="text-align:right">${pct(num(a.dy))}</div>
+          <div style="text-align:right">${num(a.qtd).toFixed(0)}</div>
+          <div style="text-align:right">${pct(weight)} <span class="note">alvo ${pct(targetBySegment(a.segmento))}</span></div>
+          <div style="text-align:right">${pct(ramoShare)}</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button data-edit="${a.ticker}" class="secondary">Editar</button><button data-sell="${a.ticker}" class="secondary">Vender</button><button data-del="${a.ticker}" class="danger">Excluir</button></div>
+        `;
+        el.appendChild(row);
       });
-
-      const tabelaSetores = document.getElementById('tabela-setores').querySelector('tbody');
-      Array.from(tabelaSetores.querySelectorAll('input')).forEach(input => {
-        input.addEventListener('input', () => recalcularTudo());
+      el.querySelectorAll("[data-edit]").forEach(btn => btn.onclick = () => {
+        const a = state.assets.find(x => x.ticker === btn.dataset.edit);
+        if (a) fillForm(a, btn.dataset.edit);
       });
-
-      document.getElementById('investimento-disponivel').addEventListener('input', () => calcularAporte());
+      el.querySelectorAll("[data-del]").forEach(btn => btn.onclick = () => {
+        state.assets = state.assets.filter(x => x.ticker !== btn.dataset.del);
+        saveAll(); refresh();
+      });
+      el.querySelectorAll("[data-sell]").forEach(btn => btn.onclick = () => promptSell(btn.dataset.sell));
+      updateSortMark();
+      renderAssetGroups();
     }
-
-    window.addEventListener('load', () => {
-      registrarEventos();
-      // Começa com uma linha de compra de exemplo (opcional)
-      // adicionarCompraLinha();
-      recalcularTudo();
-    });
+    function renderAssetGroups() {
+      const host = $("assetGroups");
+      host.innerHTML = "";
+      const groups = {};
+      for (const a of state.assets) {
+        const key = a.segmento || "Outros";
+        groups[key] ||= [];
+        groups[key].push(a);
+      }
+      const order = TARGETS.map(t => t.segmento).concat(Object.keys(groups).filter(k => !TARGETS.some(t => t.segmento === k)));
+      for (const segmento of order) {
+        const items = groups[segmento];
+        if (!items || !items.length) continue;
+        const invested = items.reduce((s, a) => s + num(a.compra) * num(a.qtd), 0);
+        const card = document.createElement("div");
+        card.className = "card";
+        card.style.marginBottom = "12px";
+        card.innerHTML = `<h3>${segmento} <span class="note">- ${brl(invested)}</span></h3>`;
+        const wrap = document.createElement("div");
+        wrap.className = "table compact";
+        wrap.innerHTML = `<div class="row head"><div>Ticker</div><div class="right">Preço médio</div><div class="right">Rendimento 1M</div><div class="right">DY</div><div class="right">Qtd</div><div class="right">Peso</div></div>`;
+        const rows = document.createElement("div");
+        const investedTotal = totalInvested();
+        items.forEach(a => {
+          const tr = document.createElement("div");
+          tr.className = "row";
+          const weight = investedTotal ? (num(a.compra) * num(a.qtd)) / investedTotal * 100 : 0;
+          tr.innerHTML = `<div><b>${a.ticker}</b></div><div style="text-align:right">${brl(num(a.precoMedio || a.compra))}</div><div style="text-align:right">${brl(num(a.rendimentoUltimoMes))}</div><div style="text-align:right">${pct(num(a.dy))}</div><div style="text-align:right">${num(a.qtd).toFixed(0)}</div><div style="text-align:right">${pct(weight)}</div>`;
+          rows.appendChild(tr);
+        });
+        wrap.appendChild(rows);
+        card.appendChild(wrap);
+        host.appendChild(card);
+      }
+    }
+    function renderOperationHistory() {
+      const host = $("assetGroups");
+      if (!host) return;
+      const historyCard = document.createElement("div");
+      historyCard.className = "card";
+      historyCard.style.marginTop = "12px";
+      historyCard.innerHTML = `<h3>Histórico de operações</h3><div class="mini">${state.operations.slice(0, 12).map(op => {
+        const when = new Date(op.at || Date.now()).toLocaleString("pt-BR");
+        return `${when} | ${op.type.toUpperCase()} | ${op.ticker} | ${op.qty} @ ${brl(op.price)}${op.note ? " | " + op.note : ""}`;
+      }).join("\n") || "Sem operações registradas."}</div><div style="margin-top:10px" class="note">Para editar uma operação, use o painel em Configurações. Você também pode excluir lançamentos antigos.</div><div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">${state.operations.slice(0, 6).map(op => `<button class="secondary" data-edit-op="${op.id}">Editar ${op.ticker}</button><button class="danger" data-del-op="${op.id}">Excluir ${op.ticker}</button>`).join("") || ""}</div>`;
+      const existing = document.getElementById("operationHistory");
+      if (existing) existing.remove();
+      historyCard.id = "operationHistory";
+      host.appendChild(historyCard);
+      historyCard.querySelectorAll("[data-edit-op]").forEach(btn => btn.onclick = () => openOperationEditor(btn.dataset.editOp));
+      historyCard.querySelectorAll("[data-del-op]").forEach(btn => btn.onclick = () => {
+        if (confirm("Excluir esta operação?")) deleteOperationById(btn.dataset.delOp);
+      });
+    }
+    function openOperationEditor(id) {
+      const op = state.operations.find(x => x.id === id);
+      if (!op) return;
+      const form = [
+        `Editar operação de ${op.ticker}`,
+        `Tipo atual: ${op.type}`,
+        `Quantidade atual: ${op.qty}`,
+        `Preço atual: ${op.price}`,
+        `Observação atual: ${op.note || ""}`,
+        "",
+        "Digite novo tipo (buy/sell) ou deixe vazio para manter:"
+      ].join("\n");
+      const type = String(prompt(form, op.type) || "").trim().toLowerCase();
+      const qty = String(prompt("Nova quantidade", String(op.qty)) || "").trim();
+      const price = String(prompt("Novo preço", String(op.price)) || "").trim();
+      const note = String(prompt("Nova observação", op.note || "") || "");
+      updateOperationById(id, {
+        type: (type === "buy" || type === "sell") ? type : op.type,
+        qty: num(qty) || op.qty,
+        price: num(price) || op.price,
+        note: note
+      });
+    }
+    function promptSell(ticker) {
+      const asset = state.assets.find(a => a.ticker === ticker);
+      if (!asset) return;
+      const qty = Number(prompt(`Quantas cotas de ${ticker} deseja vender?`, String(num(asset.qtd) || 1)));
+      if (!qty || qty <= 0) return;
+      const price = Number(prompt(`Preço de venda por cota de ${ticker}?`, String(num(asset.precoAtual || asset.compra) || 0)));
+      if (!price || price <= 0) return;
+      const currentQty = num(asset.qtd);
+      const sold = Math.min(currentQty, qty);
+      asset.qtd = Math.max(0, currentQty - sold);
+      addOperation("sell", ticker, sold, price, "Venda registrada manualmente");
+      if (asset.qtd <= 0) state.assets = state.assets.filter(a => a.ticker !== ticker);
+      saveAll();
+      refresh();
+    }
+    function renderSuggestionCards() {
+      const host = $("suggestionCards");
+      if (!host) return;
+      host.innerHTML = "";
+      suggestionItems.forEach((item) => {
+        const card = document.createElement("div");
+        card.className = "functionCard";
+        card.innerHTML = `<div class="name">${item.name}</div><div class="desc">${item.desc}</div>`;
+        card.addEventListener("click", () => {
+          alert(`${item.name}\n\n${item.desc}`);
+        });
+        host.appendChild(card);
+      });
+    }
+    function setViewMode(mode) {
+      state.viewMode = mode;
+      $("viewSummary").classList.toggle("active", mode === "summary");
+      $("viewDetail").classList.toggle("active", mode === "detail");
+      refresh();
+    }
+    function renderCarteiraView() {
+      const groups = {};
+      for (const a of state.assets) {
+        const key = a.segmento || "Outros";
+        groups[key] ||= [];
+        groups[key].push(a);
+      }
+      const order = TARGETS.map(t => t.segmento).concat(Object.keys(groups).filter(k => !TARGETS.some(t => t.segmento === k)));
+      const html = [];
+      for (const segmento of order) {
+        const items = groups[segmento];
+        if (!items || !items.length) continue;
+        const invested = items.reduce((s, a) => s + num(a.compra) * num(a.qtd), 0);
+        const current = items.reduce((s, a) => s + (num(a.precoAtual) || num(a.compra)) * num(a.qtd), 0);
+        const weight = totalCurrent() ? current / totalCurrent() * 100 : 0;
+        if (state.viewMode === "summary") {
+          html.push(`<div class="card" style="margin-bottom:12px"><h3>${segmento} <span class="note">- ${brl(invested)} | ${pct(weight)} da carteira</span></h3><div class="note">Ativos: ${items.length}</div></div>`);
+        } else {
+          const detailRows = items.map(a => {
+            const w = totalInvested() ? (num(a.compra) * num(a.qtd)) / totalInvested() * 100 : 0;
+            return `<div class="row"><div><b>${a.ticker}</b><div class="note">${a.segmento || ""}</div></div><div style="text-align:right">${brl(num(a.precoMedio || a.compra))}</div><div style="text-align:right">${brl(num(a.precoAtual || a.compra))}</div><div style="text-align:right">${num(a.pvp || 0).toFixed(2)}</div><div style="text-align:right">${brl(num(a.rendimentoUltimoMes))}</div><div style="text-align:right">${pct(num(a.dy))}</div><div style="text-align:right">${num(a.qtd).toFixed(0)}</div><div style="text-align:right">${pct(w)}</div><div style="text-align:right">${pct((current / totalCurrent()) * 100)}</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button data-edit="${a.ticker}" class="secondary">Editar</button><button data-del="${a.ticker}" class="danger">Excluir</button></div></div>`;
+          }).join("");
+          html.push(`<div class="card" style="margin-bottom:12px;padding:10px"><h3>${segmento} <span class="note">- ${brl(invested)} | ${items.length} ativos</span></h3><div class="table compact"><div class="row head"><div>Ticker</div><div class="right">Preço médio</div><div class="right">Preço mercado</div><div class="right">P/VP</div><div class="right">Rend. 1M</div><div class="right">DY</div><div class="right">Qtd</div><div class="right">Peso</div><div class="right">Ramo%</div><div>Ações</div></div>${detailRows}</div></div>`);
+        }
+      }
+      const host = $("assetGroups");
+      if (host) host.innerHTML = html.join("");
+      if (state.viewMode === "detail") {
+        document.querySelectorAll("#assetGroups [data-edit]").forEach(btn => btn.onclick = () => {
+          const a = state.assets.find(x => x.ticker === btn.dataset.edit);
+          if (a) fillForm(a, btn.dataset.edit);
+        });
+        document.querySelectorAll("#assetGroups [data-del]").forEach(btn => btn.onclick = () => {
+          state.assets = state.assets.filter(x => x.ticker !== btn.dataset.del);
+          saveAll(); refresh();
+        });
+      }
+    }
+    function renderDashboard() {
+      const invested = totalInvested(), current = totalCurrent(), res = current - invested;
+      const totalBuys = state.operations.filter(op => op.type === "buy").reduce((s, op) => s + num(op.qty) * num(op.price), 0);
+      const totalSells = state.operations.filter(op => op.type === "sell").reduce((s, op) => s + num(op.qty) * num(op.price), 0);
+      const totalDividends = state.dividends.reduce((s, d) => s + num(d.amount), 0);
+      const monthKey = new Date().toISOString().slice(0, 7);
+      const monthBuys = state.operations.filter(op => op.type === "buy" && String(op.at || "").slice(0, 7) === monthKey).reduce((s, op) => s + num(op.qty) * num(op.price), 0);
+      const monthDividends = state.dividends.filter(d => String(d.at || d.date || "").slice(0, 7) === monthKey).reduce((s, d) => s + num(d.amount), 0);
+      const totalProfitability = current + totalSells + totalDividends - totalBuys;
+      $("kInvestido").textContent = brl(invested);
+      $("kAtual").textContent = brl(current);
+      $("kResultado").textContent = brl(res);
+      $("kResultado").style.color = res >= 0 ? "var(--good)" : "var(--bad)";
+      $("kCash").textContent = brl(state.settings.cashAvailable);
+      $("kInvestidoTop").textContent = brl(invested);
+      $("kResultadoTop").textContent = brl(res);
+      $("kCashTop").textContent = brl(state.settings.cashAvailable);
+      $("kMonthlyGoalTop").textContent = brl(state.settings.monthlyGoal);
+      $("kMonthlyGoal").textContent = brl(state.settings.monthlyGoal);
+      const goalUsed = state.settings.monthlyGoal ? (totalBuys / state.settings.monthlyGoal) * 100 : 0;
+      $("kGoalUsed").textContent = pct(goalUsed);
+      $("kGoalDiff").textContent = brl(state.settings.monthlyGoal - totalBuys);
+      $("kGoalDiff").style.color = totalBuys >= state.settings.monthlyGoal ? "var(--good)" : "var(--accent)";
+      $("kAportes").textContent = brl(totalBuys);
+      $("kVendas").textContent = brl(totalSells);
+      $("kProventos").textContent = brl(totalDividends);
+      $("kRentabTotal").textContent = brl(totalProfitability);
+      $("kRentabTotal").style.color = totalProfitability >= 0 ? "var(--good)" : "var(--bad)";
+      if (state.settings.dailyMode) {
+        const dailyMode = document.createElement("div");
+        dailyMode.className = "card";
+        dailyMode.style.marginTop = "12px";
+        dailyMode.innerHTML = `
+          <h3>Modo diário</h3>
+          <div class="kpis" style="grid-template-columns:repeat(2,1fr)">
+            <div class="kpi"><div class="k">Investido</div><div class="v">${brl(invested)}</div></div>
+            <div class="kpi"><div class="k">Resultado</div><div class="v">${brl(res)}</div></div>
+            <div class="kpi"><div class="k">Aportes mês</div><div class="v">${brl(totalBuys)}</div></div>
+            <div class="kpi"><div class="k">Proventos mês</div><div class="v">${brl(totalDividends)}</div></div>
+          </div>`;
+        const old = document.getElementById("dailyModeCard");
+        if (old) old.remove();
+        dailyMode.id = "dailyModeCard";
+        const host = document.querySelector("#tab-dashboard");
+        if (host) host.appendChild(dailyMode);
+      } else {
+        document.getElementById("dailyModeCard")?.remove();
+      }
+      const monthlyGoalBox = document.getElementById("kGoalUsed");
+      if (monthlyGoalBox) monthlyGoalBox.title = `Compras no mês: ${brl(monthBuys)} | Proventos no mês: ${brl(monthDividends)}`;
+      const seg = holdingsBySegment(); const segEl = $("segmentBars"); segEl.innerHTML = "";
+      Object.entries(seg).sort((a,b)=>b[1].current-a[1].current).forEach(([name,v]) => {
+        const weight = current ? v.current/current*100 : 0;
+        const t = document.createElement("div"); t.style.marginBottom = "12px";
+        t.innerHTML = `<div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:6px"><b>${name}</b><span class="note">${pct(weight)} | alvo ${pct(v.target)}</span></div><div class="bar"><div style="width:${Math.max(4, Math.min(100, weight))}%"></div></div>`;
+        segEl.appendChild(t);
+      });
+      const drift = state.assets
+        .map(a => {
+          const investedShare = invested ? (num(a.compra)*num(a.qtd))/invested*100 : 0;
+          return {...a, investedShare, drift: investedShare - num(a.target)};
+        })
+        .sort((a,b)=>a.drift-b.drift);
+      const dEl = $("driftList"); dEl.innerHTML = "";
+      drift.forEach(a => {
+        const d = document.createElement("div");
+        d.className = "row";
+        d.style.gridTemplateColumns = "1fr .8fr .8fr";
+        d.innerHTML = `<div><b>${a.ticker}</b><div class="note">${a.segmento}</div></div><div style="text-align:right">${pct(a.investedShare)}</div><div style="text-align:right;color:${a.drift<=0?"var(--bad)":"var(--good)"}">${pct(a.drift)}</div>`;
+        dEl.appendChild(d);
+      });
+      renderProfitabilityPanel();
+      renderPriorityRank();
+      renderFilterSummary();
+      drawMonthlyChart();
+      renderRiskPanel();
+    }
+    function renderProfitabilityPanel() {
+      const host = $("profitabilityPanel");
+      if (!host) return;
+      const invested = totalInvested();
+      const current = totalCurrent();
+      const buysByTicker = {};
+      const sellsByTicker = {};
+      for (const op of state.operations) {
+        if (op.type === "buy") buysByTicker[op.ticker] = (buysByTicker[op.ticker] || 0) + num(op.qty) * num(op.price);
+        if (op.type === "sell") sellsByTicker[op.ticker] = (sellsByTicker[op.ticker] || 0) + num(op.qty) * num(op.price);
+      }
+      const rows = state.assets.map(a => {
+        const buy = buysByTicker[a.ticker] || (num(a.compra) * num(a.qtd));
+        const sell = sellsByTicker[a.ticker] || 0;
+        const div = state.dividends.filter(d => d.ticker === a.ticker).reduce((s, d) => s + num(d.amount), 0);
+        const valueNow = (num(a.precoAtual) || num(a.compra)) * num(a.qtd);
+        const pnl = valueNow + sell + div - buy;
+        return { ticker: a.ticker, segmento: a.segmento, buy, sell, div, valueNow, pnl };
+      });
+      const bySegment = {};
+      for (const r of rows) {
+        bySegment[r.segmento] ||= { buy: 0, sell: 0, div: 0, valueNow: 0, pnl: 0, count: 0 };
+        bySegment[r.segmento].buy += r.buy;
+        bySegment[r.segmento].sell += r.sell;
+        bySegment[r.segmento].div += r.div;
+        bySegment[r.segmento].valueNow += r.valueNow;
+        bySegment[r.segmento].pnl += r.pnl;
+        bySegment[r.segmento].count++;
+      }
+      const segmentRows = Object.entries(bySegment).map(([segmento, r]) => ({
+        segmento,
+        ...r
+      })).sort((a, b) => b.pnl - a.pnl);
+      host.innerHTML = `
+        <div class="card" style="padding:12px;margin-bottom:12px">
+          <h3>Rentabilidade por ramo</h3>
+          <div class="table compact">
+            <div class="row head"><div>Ramo</div><div class="right">Compras</div><div class="right">Vendas</div><div class="right">Proventos</div><div class="right">Atual</div><div class="right">Resultado</div></div>
+            ${segmentRows.map(r => `<div class="row">
+              <div><b>${r.segmento}</b><div class="note">${r.count} ativos</div></div>
+              <div style="text-align:right">${brl(r.buy)}</div>
+              <div style="text-align:right">${brl(r.sell)}</div>
+              <div style="text-align:right">${brl(r.div)}</div>
+              <div style="text-align:right">${brl(r.valueNow)}</div>
+              <div style="text-align:right;color:${r.pnl >= 0 ? "var(--good)" : "var(--bad)"}">${brl(r.pnl)}</div>
+            </div>`).join("")}
+          </div>
+        </div>
+        <div class="table compact">
+          <div class="row head">
+            <div>Ticker</div><div class="right">Compras</div><div class="right">Vendas</div><div class="right">Proventos</div><div class="right">Atual</div><div class="right">Resultado</div>
+          </div>
+          ${rows.map(r => `<div class="row">
+            <div><b>${r.ticker}</b><div class="note">${r.segmento}</div></div>
+            <div style="text-align:right">${brl(r.buy)}</div>
+            <div style="text-align:right">${brl(r.sell)}</div>
+            <div style="text-align:right">${brl(r.div)}</div>
+            <div style="text-align:right">${brl(r.valueNow)}</div>
+            <div style="text-align:right;color:${r.pnl >= 0 ? "var(--good)" : "var(--bad)"}">${brl(r.pnl)}</div>
+          </div>`).join("")}
+        </div>`;
+    }
+    function renderDividendPanel() {
+      const host = $("dividendHistory");
+      if (!host) return;
+      const total = state.dividends.reduce((s, d) => s + num(d.amount), 0);
+      host.innerHTML = `
+        <div class="pill">Total de proventos registrados: ${brl(total)}</div>
+        <div class="mini" style="margin-top:10px">${state.dividends.slice(0, 12).map(d => {
+          return `${d.date || ""} | ${d.ticker} | ${brl(d.amount)}${d.note ? " | " + d.note : ""}`;
+        }).join("\n") || "Sem proventos registrados."}</div>`;
+      const editor = $("operationEditor");
+      if (editor) {
+        editor.innerHTML = state.operations.length
+          ? `Use os botões no histórico para editar ou excluir lançamentos passados. Operações registradas: ${state.operations.length}.`
+          : "Sem operações registradas ainda.";
+      }
+    }
+    function renderNotesList() {
+      const host = $("notesList");
+      if (!host) return;
+      const entries = Object.entries(state.notes || {});
+      host.innerHTML = entries.length ? entries.map(([ticker, note]) => {
+        return `<div class="card" style="padding:10px;margin-bottom:8px"><b>${ticker}</b><div class="note" style="margin-top:6px">${note}</div></div>`;
+      }).join("") : `<div class="note">Nenhuma nota registrada ainda.</div>`;
+    }
+    function saveNote() {
+      const ticker = $("noteTicker").value.trim().toUpperCase();
+      const note = $("noteText").value.trim();
+      if (!ticker) return alert("Informe o ticker.");
+      if (!note) return alert("Escreva a nota.");
+      state.notes[ticker] = note;
+      saveAll();
+      renderNotesList();
+      renderRiskPanel();
+      $("noteTicker").value = "";
+      $("noteText").value = "";
+    }
+    function renderPriorityRank() {
+      const host = $("priorityRank");
+      if (!host) return;
+      const invested = totalInvested();
+      const cash = num(state.settings.cashAvailable || $("buyCash").value);
+      const candidates = state.assets.map(a => {
+        const share = invested ? (num(a.compra) * num(a.qtd)) / invested * 100 : 0;
+        const target = num(a.target);
+        const drift = target - share;
+        const price = num(a.precoAtual) || num(a.compra);
+        const score = (drift * 2.2) + (num(a.dy) * 0.15) + ((2 - num(a.pvp || 0)) * 8) + (price > 0 ? 5 / price : 0);
+        return { ...a, share, drift, price, score };
+      }).filter(a => a.price > 0).sort((a, b) => b.score - a.score).slice(0, 10);
+      const top = candidates[0];
+      $("bestBuySummary").textContent = top
+        ? `Melhor compra do dia: ${top.ticker} | ${top.segmento} | comprar ${Math.max(1, Math.min(Math.max(1, Math.floor(cash / top.price)), Math.max(1, Math.round(Math.max(1, top.drift) / 3))))} cota(s) | desvio ${pct(top.drift)}`
+        : "Melhor compra do dia: aguardando cálculo";
+      host.innerHTML = candidates.length ? candidates.map((a, i) => {
+        const qtyByCash = Math.max(1, Math.floor(cash / a.price));
+        const qtyByGap = Math.max(1, Math.round(Math.max(1, a.drift) / 3));
+        const qty = Math.max(1, Math.min(qtyByCash, qtyByGap));
+        const spend = qty * a.price;
+        const ramoTotal = invested ? state.assets.filter(x => x.segmento === a.segmento).reduce((s, x) => s + num(x.compra) * num(x.qtd), 0) : 0;
+        const ramoPct = invested ? (ramoTotal / invested) * 100 : 0;
+        if (state.rankView === "compact") {
+          return `<div class="card" style="padding:10px;margin-bottom:8px">
+            <div><b>${i + 1}. ${a.ticker}</b> <span class="note">${a.segmento}</span></div>
+            <div class="note">desvio ${pct(a.drift)} | DY ${pct(a.dy)} | P/VP ${num(a.pvp || 0).toFixed(2)} | ramo ${pct(ramoPct)}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+              <button class="secondary" data-buy-ticker="${a.ticker}" data-buy-qty="${qty}">Comprar ${qty}</button>
+              <span class="pill">${brl(spend)}</span>
+            </div>
+          </div>`;
+        }
+        return `<div class="card" style="padding:10px;margin-bottom:8px">
+          <div><b>${i + 1}. ${a.ticker}</b> <span class="note">${a.segmento}</span></div>
+          <div class="note">peso ${pct(a.share)} | alvo ${pct(a.target)} | desvio ${pct(a.drift)} | ramo ${pct(ramoPct)} | DY ${pct(a.dy)} | P/VP ${num(a.pvp || 0).toFixed(2)}</div>
+          <div class="mini" style="margin-top:6px">Preço atual ${brl(a.price)} | sugerido ${qty} cota(s) | gasto ${brl(spend)}</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+            <button class="secondary" data-buy-ticker="${a.ticker}" data-buy-qty="${qty}">Comprar ${qty} cota(s)</button>
+            <span class="pill">${brl(spend)}</span>
+          </div>
+        </div>`;
+      }).join("") : "Sem ativos para ranquear.";
+      host.querySelectorAll("[data-buy-ticker]").forEach(btn => btn.onclick = () => {
+        const ticker = btn.dataset.buyTicker;
+        const qty = Number(btn.dataset.buyQty || 1);
+        const asset = state.assets.find(x => x.ticker === ticker);
+        if (!asset) return;
+        const price = num(asset.precoAtual) || num(asset.compra);
+        const spend = qty * price;
+        if (!confirm(`Confirmar compra rápida?\n\nTicker: ${ticker}\nQuantidade: ${qty}\nValor estimado: ${brl(spend)}`)) return;
+        const currentQty = num(asset.qtd);
+        asset.qtd = currentQty + qty;
+        addOperation("buy", ticker, qty, price, "Compra rápida pelo ranking");
+        saveAll();
+        refresh();
+      });
+      $("rankCompact")?.classList.toggle("active", state.rankView === "compact");
+      $("rankDetail")?.classList.toggle("active", state.rankView === "detail");
+    }
+    function renderFilterSummary() {
+      const host = $("filterSummary");
+      if (!host) return;
+      const items = filteredAssets();
+      const labels = [];
+      if (state.filters.segment) labels.push(`Ramo: ${state.filters.segment}`);
+      if (state.filters.minDy) labels.push(`DY >= ${state.filters.minDy}%`);
+      if (state.filters.maxPvp) labels.push(`P/VP <= ${state.filters.maxPvp}`);
+      if (state.filters.minPrice) labels.push(`Preço >= ${state.filters.minPrice}`);
+      if (state.filters.maxPrice) labels.push(`Preço <= ${state.filters.maxPrice}`);
+      if (state.filters.maxConcentration) labels.push(`Concentração máx. ${state.filters.maxConcentration}%`);
+      if (state.filters.search) labels.push(`Busca: ${state.filters.search}`);
+      host.textContent = [
+        labels.length ? `Filtros ativos: ${labels.join(" | ")}` : "Sem filtros ativos.",
+        `Ativos encontrados: ${items.length}`
+      ].join("\n");
+    }
+    function drawMonthlyChart() {
+      const canvas = $("monthlyChart");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width, h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = "rgba(0,0,0,.18)";
+      ctx.fillRect(0, 0, w, h);
+      const byMonth = {};
+      const buyByMonth = {};
+      const divByMonth = {};
+      for (const op of state.operations.filter(op => op.type === "buy")) {
+        const key = String(op.at || "").slice(0, 7);
+        if (!key) continue;
+        buyByMonth[key] = (buyByMonth[key] || 0) + num(op.qty) * num(op.price);
+      }
+      for (const d of state.dividends) {
+        const key = String(d.at || d.date || "").slice(0, 7);
+        if (!key) continue;
+        divByMonth[key] = (divByMonth[key] || 0) + num(d.amount);
+      }
+      const keys = Array.from(new Set([...Object.keys(buyByMonth), ...Object.keys(divByMonth)])).sort().slice(-12);
+      const buyValues = keys.map(k => buyByMonth[k] || 0);
+      const divValues = keys.map(k => divByMonth[k] || 0);
+      const max = Math.max(...buyValues, ...divValues, 1);
+      const pad = 28;
+      const plotH = h - pad * 2;
+      const buyMax = Math.max(...buyValues, 1);
+      const sellValues = keys.map(k => state.operations.filter(op => op.type === "sell" && String(op.at || "").slice(0, 7) === k).reduce((s, op) => s + num(op.qty) * num(op.price), 0));
+      const sellMax = Math.max(...sellValues, 1);
+      ctx.strokeStyle = "rgba(255,255,255,.18)";
+      ctx.beginPath();
+      ctx.moveTo(pad, h - pad);
+      ctx.lineTo(w - pad, h - pad);
+      ctx.stroke();
+      keys.forEach((k, i) => {
+        const x = pad + i * ((w - pad * 2) / Math.max(1, keys.length));
+        const barW = Math.max(12, (w - pad * 2) / Math.max(1, keys.length) - 8);
+        const buyH = (buyValues[i] / max) * plotH;
+        const sellH = (sellValues[i] / max) * plotH;
+        const divH = (divValues[i] / max) * plotH;
+        const totalStack = buyH + sellH + divH;
+        ctx.fillStyle = "rgba(143,212,255,.65)";
+        ctx.fillRect(x, h - pad - buyH, barW, buyH);
+        ctx.fillStyle = "rgba(255,138,138,.72)";
+        ctx.fillRect(x, h - pad - buyH - sellH, barW, sellH);
+        ctx.fillStyle = "rgba(255,224,130,.72)";
+        ctx.fillRect(x, h - pad - buyH - sellH - divH, barW, divH);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "10px ui-monospace,Consolas,monospace";
+        ctx.fillText(k.slice(5), x, h - 10);
+      });
+    }
+    function renderRiskPanel() {
+      const host = $("riskPanel");
+      if (!host) return;
+      const invested = totalInvested();
+      const current = totalCurrent();
+      const segmentMap = holdingsBySegment();
+      const segmentRisk = Object.entries(segmentMap).map(([segmento, data]) => {
+        const share = current ? data.current / current * 100 : 0;
+        return { segmento, share, target: data.target, drift: share - data.target, count: data.count };
+      }).sort((a, b) => Math.abs(b.drift) - Math.abs(a.drift));
+      const tickerRisk = state.assets.map(a => {
+        const share = invested ? (num(a.compra) * num(a.qtd)) / invested * 100 : 0;
+        const target = num(a.target);
+        return { ticker: a.ticker, segmento: a.segmento, share, target, drift: share - target, price: num(a.precoAtual) || num(a.compra), notes: state.notes[a.ticker] || "" };
+      }).sort((a, b) => Math.abs(b.drift) - Math.abs(a.drift));
+      host.innerHTML = `
+        <div class="grid2">
+          <div class="card" style="padding:12px">
+            <h3>Concentração por ramo</h3>
+            ${segmentRisk.map(r => {
+              const flagged = Math.abs(r.drift) >= threshold;
+              return `<div class="row" style="grid-template-columns:1.2fr .7fr .7fr .7fr;${flagged ? "background:rgba(255,138,138,.10);border-radius:10px;" : ""}">
+                <div><b>${r.segmento}</b><div class="note">${r.count} ativos</div></div>
+                <div style="text-align:right">${pct(r.share)}</div>
+                <div style="text-align:right">alvo ${pct(r.target)}</div>
+                <div style="text-align:right;color:${r.drift >= 0 ? "var(--bad)" : "var(--good)"}">${pct(r.drift)}</div>
+              </div>`;
+            }).join("")}
+          </div>
+          <div class="card" style="padding:12px">
+            <h3>Maior risco por ativo</h3>
+            ${tickerRisk.slice(0, 8).map(r => {
+              const flagged = Math.abs(r.drift) >= threshold;
+              return `<div class="row" style="grid-template-columns:1.2fr .7fr .7fr .7fr;${flagged ? "background:rgba(255,138,138,.10);border-radius:10px;" : ""}">
+                <div><b>${r.ticker}</b><div class="note">${r.segmento}${r.notes ? " | nota" : ""}</div></div>
+                <div style="text-align:right">${pct(r.share)}</div>
+                <div style="text-align:right">${pct(r.target)}</div>
+                <div style="text-align:right;color:${r.drift >= 0 ? "var(--bad)" : "var(--good)"}">${pct(r.drift)}</div>
+              </div>`;
+            }).join("")}
+          </div>
+        </div>`;
+    }
+    function renderAlerts() {
+      const el = $("driftList");
+      if (!el) return;
+      const threshold = num(state.settings.alertThreshold) || 2;
+      const alerts = state.assets.map(a => {
+        const invested = totalInvested();
+        const share = invested ? (num(a.compra) * num(a.qtd)) / invested * 100 : 0;
+        const target = num(a.target);
+        return { ticker: a.ticker, segment: a.segmento, diff: share - target, share, target };
+      }).filter(x => Math.abs(x.diff) >= threshold);
+      const alertBox = document.createElement("div");
+      alertBox.className = "card";
+      alertBox.style.marginTop = "12px";
+      alertBox.innerHTML = `<h3>Alertas de desvio</h3><div class="mini">${alerts.length ? alerts.map(a => `${a.ticker} | ${a.segment} | atual ${pct(a.share)} | alvo ${pct(a.target)} | desvio ${pct(a.diff)}`).join("\n") : "Sem desvios relevantes no momento."}</div>`;
+      const existing = document.getElementById("alertsBox");
+      if (existing) existing.remove();
+      alertBox.id = "alertsBox";
+      el.parentElement.appendChild(alertBox);
+    }
+    function exportBackup() {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        assets: state.assets,
+        settings: state.settings,
+        operations: state.operations,
+        dividends: state.dividends,
+        notes: state.notes
+      };
+      localStorage.setItem(LS.backup, JSON.stringify(payload));
+    }
+    function refresh() { renderAssets(); renderDashboard(); renderCarteiraView(); renderAlerts(); renderOperationHistory(); renderDividendPanel(); renderNotesList(); exportBackup(); }
+    function fillForm(a, idx) {
+      $("fTicker").value = a.ticker || "";
+      $("fSegmento").value = a.segmento || "";
+      $("fPreco").value = a.compra || "";
+      $("fQtd").value = a.qtd || "";
+      $("fPrecoAtual").value = a.precoAtual || "";
+      $("fRendimentoUltimoMes").value = a.rendimentoUltimoMes || "";
+      $("fDy").value = a.dy || "";
+      $("btnSaveAsset").dataset.editIndex = idx;
+      $("assetModeHint").textContent = `Modo atual: editando ${a.ticker}.`;
+      $("btnSaveAsset").textContent = "Atualizar ativo";
+    }
+    function clearForm() {
+      ["fTicker","fSegmento","fPreco","fQtd","fPrecoAtual","fRendimentoUltimoMes","fDy"].forEach(id => $(id).value = "");
+      delete $("btnSaveAsset").dataset.editIndex;
+      $("assetModeHint").textContent = "Modo atual: novo cadastro.";
+      $("btnSaveAsset").textContent = "Salvar ativo";
+    }
+    function saveAsset() {
+      const segmentoCalc = normalizeSegment($("fSegmento").value.trim() || inferSegment($("fTicker").value, ""));
+      const asset = {
+        ticker: $("fTicker").value.trim().toUpperCase(),
+        segmento: segmentoCalc,
+        compra: num($("fPreco").value),
+        qtd: num($("fQtd").value),
+        target: targetBySegment(segmentoCalc),
+        precoAtual: num($("fPrecoAtual").value) || undefined,
+        precoMedio: num($("fPreco").value),
+        rendimentoUltimoMes: num($("fRendimentoUltimoMes")?.value),
+        dy: num($("fDy")?.value)
+      };
+      if (!asset.ticker) return alert("Informe o ticker.");
+      const editTicker = $("btnSaveAsset").dataset.editIndex;
+      if (editTicker) {
+        const idx = state.assets.findIndex(x => x.ticker === editTicker);
+        if (idx >= 0) state.assets[idx] = asset; else state.assets.push(asset);
+      } else {
+        state.assets.push(asset);
+      }
+      saveAll(); clearForm(); refresh();
+    }
+    function renderTargets() {
+      const el = $("targetBars");
+      el.innerHTML = "";
+      TARGETS.forEach(t => {
+        const d = document.createElement("div");
+        d.style.marginBottom = "12px";
+        d.innerHTML = `<div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:6px"><b>${t.segmento}</b><span class="note">${pct(t.peso)}</span></div><div class="bar"><div style="width:${t.peso}%"></div></div>`;
+        el.appendChild(d);
+      });
+    }
+    function downloadJson() {
+      const payload = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        settings: state.settings,
+        assets: state.assets,
+        operations: state.operations,
+        dividends: state.dividends,
+        notes: state.notes
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "carteira-fii.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    async function importJsonFile(file) {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      state.assets = Array.isArray(data.assets) ? data.assets : [];
+      state.settings = Object.assign(state.settings, data.settings || {});
+      state.operations = Array.isArray(data.operations) ? data.operations : [];
+      state.dividends = Array.isArray(data.dividends) ? data.dividends : [];
+      state.notes = data.notes && typeof data.notes === "object" ? data.notes : {};
+      $("cashAvailable").value = state.settings.cashAvailable || "";
+      $("openaiModel").value = state.settings.openaiModel || "gpt-4o-mini";
+      $("buyCash").value = state.settings.cashAvailable || "";
+      saveAll();
+      refresh();
+    }
+    function marketPrompt(ticker) {
+      return [
+        `Busque informações atualizadas do FII ${ticker} no mercado financeiro brasileiro.`,
+        "Retorne em JSON com as chaves:",
+        "- ticker",
+        "- segmento",
+        "- precoMedio",
+        "- rendimentoUltimoMes",
+        "- dy",
+        "- precoAtual",
+        "- fonte",
+        "Use apenas valores numéricos nos campos numéricos e mantenha a resposta curta."
+      ].join("\n");
+    }
+    async function pickSaveFile() {
+      if (!window.showSaveFilePicker) {
+        alert("Seu navegador não suporta File System Access API.");
+        return;
+      }
+      state.fileHandle = await window.showSaveFilePicker({
+        suggestedName: "carteira-fii.json",
+        types: [{ description: "JSON", accept: { "application/json": [".json"] } }]
+      });
+    }
+    async function saveToChosenFile() {
+      if (!state.fileHandle) await pickSaveFile();
+      if (!state.fileHandle) return;
+      const payload = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        settings: state.settings,
+        assets: state.assets,
+        notes: state.notes
+      };
+      const writable = await state.fileHandle.createWritable();
+      await writable.write(JSON.stringify(payload, null, 2));
+      await writable.close();
+      alert("Carteira salva no arquivo escolhido.");
+    }
+    async function syncChosenFile() {
+      if (!state.fileHandle) {
+        alert("Escolha um arquivo de salvamento primeiro.");
+        return;
+      }
+      await saveToChosenFile();
+    }
+    function parsePlanilhaText(text) {
+      const raw = String(text || "").trim();
+      if (!raw) return [];
+      const lines = raw.split(/\r?\n/).filter(Boolean);
+      const delimiter = lines[0].includes(";") && !lines[0].includes(",") ? ";" : ",";
+      const headers = lines[0].split(delimiter).map(h => h.trim().toLowerCase());
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(delimiter);
+        const row = {};
+        headers.forEach((h, idx) => row[h] = (cols[idx] || "").trim());
+        rows.push(row);
+      }
+      return rows;
+    }
+    async function importSpreadsheetFile(file) {
+      if (file.name.toLowerCase().endsWith(".xlsx")) {
+        const form = new FormData();
+        form.append("file", file);
+        const r = await fetch("/api/import_xlsx.php", { method: "POST", body: form });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(j.error || "Falha ao importar XLSX");
+        const rows = Array.isArray(j.rows) ? j.rows : [];
+        return importSpreadsheetRows(rows);
+      }
+      const text = await file.text();
+      const rows = parsePlanilhaText(text);
+      return importSpreadsheetRows(rows);
+    }
+    function importSpreadsheetRows(rows) {
+      if (!rows.length) return alert("Planilha vazia ou formato inválido.");
+      const imported = [];
+      for (const row of rows) {
+        const ticker = (row.ticker || row.codigo || row.codigo_do_ativo || row.ativo || "").toUpperCase().trim();
+        if (!ticker || ticker.length < 4) continue;
+        const segmento = normalizeSegment(row.segmento || row.ramo || inferSegment(ticker, ""));
+        const qtd = num(row.qtd || row.quantidade || row.quantidade_cotas);
+        const preco = num(row.preco_compra || row.preco || row.preco_medio || row.compra);
+        if (!qtd && !preco) continue;
+        imported.push({
+          ticker,
+          segmento,
+          compra: preco,
+          qtd,
+          target: targetBySegment(segmento),
+          precoAtual: num(row.preco_atual || row.preco_mercado || row.valor_atual) || undefined,
+          precoMedio: preco,
+          rendimentoUltimoMes: num(row.rendimento_ultimo_mes || row.rendimento || row.provento),
+          dy: num(row.dy || row.dy_percentual || row["dy_%"] || row["dy (%)"]),
+          pvp: num(row.pvp)
+        });
+      }
+      if (!imported.length) return alert("Nenhum ticker encontrado na planilha.");
+      state.assets = imported;
+      saveAll();
+      refresh();
+    }
+    async function fetchMarketData(ticker) {
+      if (!ticker) return null;
+      const r = await fetch(`/api/market.php?ticker=${encodeURIComponent(ticker)}`);
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error || `Falha mercado ${r.status}`);
+      return j;
+    }
+    async function refreshMarketForPortfolio() {
+      if (!state.assets.length) {
+        alert("Não há ativos na carteira para atualizar.");
+        return;
+      }
+      const btn = $("btnRefreshMarket");
+      const original = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "Atualizando...";
+      try {
+        for (let i = 0; i < state.assets.length; i++) {
+          const a = state.assets[i];
+          if (!a.ticker) continue;
+          const data = await fetchMarketData(a.ticker);
+          if (!data) continue;
+          state.assets[i] = {
+            ...a,
+            segmento: data.segmento ? normalizeSegment(data.segmento) : a.segmento,
+            precoAtual: num(data.precoAtual) || a.precoAtual,
+            pvp: num(data.pvp) || a.pvp,
+            rendimentoUltimoMes: num(data.rendimentoUltimoMes) || a.rendimentoUltimoMes,
+            dy: num(data.dy) || a.dy,
+            precoMedio: num(data.precoMedio) || a.precoMedio || a.compra
+          };
+        }
+        saveAll();
+        refresh();
+      } catch (err) {
+        alert(`Falha ao atualizar mercado: ${err.message || err}`);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+      }
+    }
+    let autoRefreshTimer = null;
+    let refreshInProgress = false;
+    function startAutoRefresh() {
+      if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+      autoRefreshTimer = setInterval(async () => {
+        try {
+          await refreshNow();
+        } catch (err) {
+          console.warn("auto refresh falhou", err);
+        }
+      }, 1000 * 60 * 60);
+    }
+    async function refreshNow() {
+      if (refreshInProgress) return;
+      refreshInProgress = true;
+      const btn = $("btnUpdateNow");
+      const original = btn ? btn.textContent : "";
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Atualizando...";
+      }
+      try {
+        if (state.assets.length) await refreshMarketForPortfolio();
+        if (state.fileHandle) await saveToChosenFile();
+      } finally {
+        refreshInProgress = false;
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = original || "Atualizar agora";
+        }
+      }
+    }
+    let tickerLookupTimer = null;
+    async function autoFillMarketData() {
+      const ticker = $("fTicker").value.trim().toUpperCase();
+      if (!ticker) return;
+      $("fSegmento").value = normalizeSegment(inferSegment(ticker, $("fSegmento").value));
+      try {
+        $("btnSaveAsset").textContent = "Buscando mercado...";
+        const data = await fetchMarketData(ticker);
+        if (!data) return;
+        if (data.segmento) $("fSegmento").value = normalizeSegment(data.segmento);
+        if (data.precoMedio) $("fPreco").value = Number(data.precoMedio).toFixed(2);
+        if (data.rendimentoUltimoMes !== undefined) $("fRendimentoUltimoMes").value = Number(data.rendimentoUltimoMes).toFixed(2);
+        if (data.dy !== undefined) $("fDy").value = Number(data.dy).toFixed(2);
+        if (data.precoAtual !== undefined) $("fPrecoAtual").value = Number(data.precoAtual).toFixed(2);
+      } catch (err) {
+        console.warn(err);
+      } finally {
+        $("btnSaveAsset").textContent = "Salvar ativo";
+      }
+    }
+    function suggestBuy() {
+      const cash = num($("buyCash").value || state.settings.cashAvailable);
+      if (!cash) return $("buyResult").textContent = "Informe um valor disponível para investir.";
+      const invested = totalInvested();
+      const candidates = state.assets.map(a => {
+        const currentPct = invested ? (num(a.compra)*num(a.qtd))/invested*100 : 0;
+        const gap = num(a.target) - currentPct;
+        const price = num(a.precoAtual) || num(a.compra);
+        return { ...a, currentPct, gap, price };
+      }).filter(a => a.price > 0).sort((a,b)=>b.gap-a.gap);
+      let remaining = cash;
+      const picks = [];
+      for (const c of candidates) {
+        if (remaining < c.price) continue;
+        const qty = Math.max(0, Math.floor((remaining * Math.min(0.45, Math.max(0.08, c.gap/100))) / c.price)) || 1;
+        const spend = qty * c.price;
+        if (spend <= remaining && qty > 0) {
+          picks.push({ ticker:c.ticker, segmento:c.segmento, qty, price:c.price, spend });
+          remaining -= spend;
+        }
+      }
+      if (!picks.length && candidates[0]) picks.push({ ticker:candidates[0].ticker, segmento:candidates[0].segmento, qty:Math.floor(cash/candidates[0].price), price:candidates[0].price, spend:Math.floor(cash/candidates[0].price)*candidates[0].price });
+      $("buyResult").textContent = `Sugestão baseada em desvio do alvo:\n${picks.map(p=>`- ${p.ticker} (${p.segmento}) -> ${p.qty} cota(s) | ${brl(p.spend)} | preço ${brl(p.price)}`).join("\n")}\n\nCaixa não usado: ${brl(remaining)}`;
+    }
+    async function openAiAnalyze(mode) {
+      const model = $("openaiModel").value.trim() || "gpt-4o-mini";
+      saveSettings();
+      const invested = totalInvested();
+      const payload = {
+        portfolio: state.assets,
+        invested,
+        cashAvailable: num($("buyCash").value || state.settings.cashAvailable),
+        goal: "Recomendar a melhor compra para rebalancear a carteira de FIIs com foco em manter os pesos alvo.",
+        needMarketData: true
+      };
+      const schema = {
+        name: "fii_advice",
+        strict: true,
+        schema: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            resumo: { type: "string" },
+            recomendacao: { type: "string" },
+            prioridade: { type: "array", items: { type: "object", additionalProperties: false, properties: { ticker:{type:"string"}, qty:{type:"integer"}, motivo:{type:"string"}, impacto:{type:"string"} }, required:["ticker","qty","motivo","impacto"] } }
+          },
+          required: ["resumo","recomendacao","prioridade"]
+        }
+      };
+      $("aiOutput").value = "Consultando OpenAI...";
+      const r = await fetch("/api/openai.php", {
+        method: "POST",
+        headers: { "Content-Type":"application/json" },
+        body: JSON.stringify({
+          action: "analyze",
+          model,
+          mode,
+          input: [
+            { role:"system", content: mode === "risk" ? "Você é um analista de risco de carteira imobiliária e responde em português do Brasil." : "Você é um analista de FIIs e rebalanceamento de carteira." },
+            { role:"user", content: JSON.stringify(payload) }
+          ],
+          schema: schema.schema
+        })
+      });
+      const j = await r.json().catch(()=>({}));
+      if (!r.ok) { $("aiOutput").value = `Erro OpenAI: ${j.error?.message || r.status}`; return; }
+      $("aiOutput").value = j.output_text || j.output?.[0]?.content?.[0]?.text || JSON.stringify(j.output_parsed || j, null, 2);
+    }
+    function saveSettings() {
+      state.settings.cashAvailable = num($("cashAvailable").value);
+      state.settings.monthlyGoal = num($("monthlyGoal").value);
+      state.settings.alertThreshold = num($("alertThreshold").value) || 2;
+      state.settings.openaiModel = $("openaiModel").value.trim() || "gpt-4o-mini";
+      state.settings.dailyMode = !!$("dailyMode").checked;
+      saveAll();
+    }
+    function calcCompoundInterest() {
+      const principal = num($("jcPrincipal").value);
+      const aporte = num($("jcAporte").value);
+      const taxa = num($("jcTaxa").value) / 100;
+      const tipo = $("jcTaxaTipo").value;
+      const months = Math.max(0, Math.floor(num($("jcMeses").value)));
+      const stepsPerMonth = tipo === "dia" ? 30 : tipo === "ano" ? 1 / 12 : 1;
+      const ratePerStep = tipo === "dia" ? taxa : tipo === "ano" ? Math.pow(1 + taxa, 1 / 12) - 1 : taxa;
+      const aporteStep = tipo === "dia" ? aporte / 30 : tipo === "ano" ? aporte / 12 : aporte;
+      let balance = principal;
+      let invested = principal;
+      const series = [];
+      const values = [];
+      const totalSteps = tipo === "dia" ? months * 30 : tipo === "ano" ? months / 12 : months;
+      const loop = Math.max(1, Math.floor(totalSteps));
+      for (let i = 1; i <= loop; i++) {
+        balance = (balance + aporteStep) * (1 + ratePerStep);
+        invested += aporteStep;
+        values.push(balance);
+        series.push(`Passo ${i}: ${brl(balance)}`);
+      }
+      const lucro = balance - invested;
+      $("jcTotalAportado").textContent = brl(invested);
+      $("jcMontanteFinal").textContent = brl(balance);
+      $("jcLucro").textContent = brl(lucro);
+      $("jcLucro").style.color = lucro >= 0 ? "var(--good)" : "var(--bad)";
+      $("jcRendimento").textContent = invested ? pct((lucro / invested) * 100) : "0,00%";
+      $("jcDetalhe").textContent = series.join("\n");
+      drawCompoundChart(values, principal, aporteStep, ratePerStep);
+    }
+    function drawCompoundChart(values, startValue, aporteStep, ratePerStep) {
+      const canvas = $("jcChart");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width, h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = "rgba(0,0,0,.18)";
+      ctx.fillRect(0, 0, w, h);
+      const data = [startValue, ...values];
+      const max = Math.max(...data, 1);
+      const min = Math.min(...data, 0);
+      const pad = 30;
+      ctx.strokeStyle = "rgba(255,255,255,.15)";
+      ctx.beginPath();
+      ctx.moveTo(pad, h - pad);
+      ctx.lineTo(w - pad, h - pad);
+      ctx.stroke();
+      ctx.strokeStyle = "#ffcc66";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      data.forEach((v, i) => {
+        const x = pad + (i / Math.max(1, data.length - 1)) * (w - pad * 2);
+        const y = h - pad - ((v - min) / Math.max(1, max - min)) * (h - pad * 2);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      ctx.fillStyle = "rgba(255,204,102,.15)";
+      ctx.beginPath();
+      data.forEach((v, i) => {
+        const x = pad + (i / Math.max(1, data.length - 1)) * (w - pad * 2);
+        const y = h - pad - ((v - min) / Math.max(1, max - min)) * (h - pad * 2);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.lineTo(w - pad, h - pad);
+      ctx.lineTo(pad, h - pad);
+      ctx.closePath();
+      ctx.fill();
+    }
+    function calcScenario(principal, aporte, taxa, meses, taxaTipo = "mes", aporteTipo = "mes") {
+      let balance = principal;
+      let invested = principal;
+      const monthlyRate = taxaTipo === "dia" ? Math.pow(1 + taxa / 100, 30) - 1 : taxaTipo === "ano" ? Math.pow(1 + taxa / 100, 1 / 12) - 1 : taxa / 100;
+      const monthlyAporte = aporteTipo === "dia" ? aporte * 30 : aporteTipo === "ano" ? aporte / 12 : aporte;
+      const points = [];
+      for (let i = 1; i <= meses; i++) {
+        balance = (balance + monthlyAporte) * (1 + monthlyRate);
+        invested += monthlyAporte;
+        points.push(balance);
+      }
+      return { invested, balance, lucro: balance - invested, monthlyRate, monthlyAporte, points };
+    }
+    function compareScenarios() {
+      const a = calcScenario(num($("aPrincipal").value), num($("aAporte").value), num($("aTaxa").value), Math.max(0, Math.floor(num($("aMeses").value))), "mes", "mes");
+      const b = calcScenario(num($("bPrincipal").value), num($("bAporte").value), num($("bTaxa").value), Math.max(0, Math.floor(num($("bMeses").value))), "mes", "mes");
+      const winner = a.balance > b.balance ? "Cenário A" : b.balance > a.balance ? "Cenário B" : "Empate";
+      $("scenarioResult").textContent = [
+        `Cenário A: aportado ${brl(a.invested)} | aporte mensal ${brl(a.monthlyAporte)} | taxa mensal ${pct(a.monthlyRate * 100)} | final ${brl(a.balance)} | lucro ${brl(a.lucro)}`,
+        `Cenário B: aportado ${brl(b.invested)} | aporte mensal ${brl(b.monthlyAporte)} | taxa mensal ${pct(b.monthlyRate * 100)} | final ${brl(b.balance)} | lucro ${brl(b.lucro)}`,
+        `Melhor resultado: ${winner}`
+      ].join("\n");
+      drawScenarioChart(a.points, b.points);
+    }
+    function drawScenarioChart(aPoints, bPoints) {
+      const canvas = $("jcChart");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width, h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = "rgba(0,0,0,.18)";
+      ctx.fillRect(0, 0, w, h);
+      const data = [0, ...(aPoints || []), ...(bPoints || [])];
+      const max = Math.max(...data, 1);
+      const min = Math.min(...data, 0);
+      const pad = 30;
+      const drawLine = (series, color) => {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        series.forEach((v, i) => {
+          const x = pad + (i / Math.max(1, series.length - 1)) * (w - pad * 2);
+          const y = h - pad - ((v - min) / Math.max(1, max - min)) * (h - pad * 2);
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+      };
+      drawLine(aPoints || [], "rgba(143,212,255,.9)");
+      drawLine(bPoints || [], "rgba(255,224,130,.9)");
+    }
+    function bindTabs() {
+      document.querySelectorAll(".tab").forEach(btn => btn.onclick = () => {
+        document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        document.querySelectorAll("section[id^='tab-']").forEach(s => s.classList.add("hidden"));
+        $("tab-" + btn.dataset.tab).classList.remove("hidden");
+      });
+    }
+    function init() {
+      loadAll();
+      bindTabs();
+      renderTargets();
+      renderSuggestionCards();
+      refresh();
+      $("btnSaveAsset").onclick = saveAsset;
+      $("btnNewAsset").onclick = clearForm;
+      $("btnSaveSettings").onclick = () => { saveSettings(); refresh(); };
+      $("btnExportJson").onclick = downloadJson;
+      $("jsonFile").addEventListener("change", async () => {
+        const file = $("jsonFile").files?.[0];
+        if (file) await importJsonFile(file);
+      });
+      $("planilhaFile").addEventListener("change", async () => {
+        const file = $("planilhaFile").files?.[0];
+        if (file) await importSpreadsheetFile(file);
+      });
+      $("btnRefreshMarket").onclick = refreshMarketForPortfolio;
+      $("btnPickSaveFile").onclick = pickSaveFile;
+      $("btnSaveToFile").onclick = saveToChosenFile;
+      $("btnSyncJson").onclick = syncChosenFile;
+      $("btnUpdateNow").onclick = refreshNow;
+      $("btnSuggestBuy").onclick = suggestBuy;
+      $("btnAiAnalyze").onclick = () => openAiAnalyze("advice");
+      $("btnAiSegment").onclick = () => openAiAnalyze("risk");
+      $("btnCalcJuros").onclick = calcCompoundInterest;
+      $("btnCompareScenarios").onclick = compareScenarios;
+      $("rankCompact").onclick = () => { state.rankView = "compact"; $("rankCompact").classList.add("active"); $("rankDetail").classList.remove("active"); refresh(); };
+      $("rankDetail").onclick = () => { state.rankView = "detail"; $("rankDetail").classList.add("active"); $("rankCompact").classList.remove("active"); refresh(); };
+      $("viewSummary").onclick = () => setViewMode("summary");
+      $("viewDetail").onclick = () => setViewMode("detail");
+      $("btnAddDividend").onclick = () => {
+        addDividend($("divTicker").value, $("divAmount").value, $("divNote").value, $("divDate").value);
+        $("divTicker").value = "";
+        $("divAmount").value = "";
+        $("divNote").value = "";
+        $("divDate").value = "";
+      };
+      $("btnSaveNote").onclick = saveNote;
+      $("cashAvailable").oninput = () => { state.settings.cashAvailable = num($("cashAvailable").value); saveAll(); refresh(); };
+      $("monthlyGoal").oninput = () => { state.settings.monthlyGoal = num($("monthlyGoal").value); saveAll(); refresh(); };
+      $("alertThreshold").oninput = () => { state.settings.alertThreshold = num($("alertThreshold").value) || 2; saveAll(); refresh(); };
+      $("dailyMode").onchange = () => { state.settings.dailyMode = $("dailyMode").checked; saveAll(); refresh(); };
+      $("btnApplyFilters").onclick = () => {
+        state.filters.segment = $("filterSegment").value;
+        state.filters.minDy = $("filterMinDy").value;
+        state.filters.maxPvp = $("filterMaxPvp").value;
+        state.filters.search = $("filterSearch").value.trim();
+        state.filters.minPrice = $("filterMinPrice").value;
+        state.filters.maxPrice = $("filterMaxPrice").value;
+        state.filters.maxConcentration = $("filterMaxConcentration").value;
+        refresh();
+      };
+      $("btnClearFilters").onclick = () => {
+        $("filterSegment").value = "";
+        $("filterMinDy").value = "";
+        $("filterMaxPvp").value = "";
+        $("filterSearch").value = "";
+        $("filterMinPrice").value = "";
+        $("filterMaxPrice").value = "";
+        $("filterMaxConcentration").value = "";
+        state.filters = { segment: "", minDy: "", maxPvp: "", search: "", minPrice: "", maxPrice: "", maxConcentration: "" };
+        refresh();
+      };
+      $("fTicker").addEventListener("change", () => {
+        if ($("btnSaveAsset").dataset.editIndex) clearForm();
+        clearTimeout(tickerLookupTimer);
+        tickerLookupTimer = setTimeout(autoFillMarketData, 350);
+      });
+      $("fTicker").addEventListener("blur", () => {
+        if ($("btnSaveAsset").dataset.editIndex) clearForm();
+        clearTimeout(tickerLookupTimer);
+        tickerLookupTimer = setTimeout(autoFillMarketData, 50);
+      });
+      document.querySelectorAll("#assetHead [data-sort]").forEach(el => {
+        el.addEventListener("click", () => {
+          const key = el.dataset.sort;
+          if (state.sortKey === key) state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+          else { state.sortKey = key; state.sortDir = "asc"; }
+          refresh();
+        });
+      });
+      startAutoRefresh();
+    }
+    init();
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
