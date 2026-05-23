@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Controle de FIIs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-card: #111827;
+      --bg-alt: #020617;
+      --border: #1f2937;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.15);
+      --text: #e5e7eb;
+      --text-soft: #9ca3af;
+      --danger: #f97373;
+      --success: #4ade80;
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1f2937 0, #020617 55%);
+      color: var(--text);
+      padding: 16px;
+    }
+
+    h1, h2, h3 {
+      margin: 0 0 12px;
+      font-weight: 600;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+    }
+
+    h2 {
+      font-size: 1.2rem;
+    }
+
+    .app-shell {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .header-title {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .header-title small {
+      color: var(--text-soft);
+      font-size: 0.8rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.75rem;
+    }
+
+    .pill span {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background: linear-gradient(145deg, var(--bg-card), var(--bg-alt));
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 14px 14px 10px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .card-header small {
+      color: var(--text-soft);
+      font-size: 0.75rem;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      margin-top: 4px;
+    }
+
+    th, td {
+      padding: 6px 6px;
+      border-bottom: 1px solid #111827;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #020617;
+      z-index: 1;
+      font-weight: 500;
+      color: var(--text-soft);
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba(15, 23, 42, 0.6);
+    }
+
+    tbody tr:nth-child(odd) {
+      background: rgba(15, 23, 42, 0.3);
+    }
+
+    tfoot td {
+      font-weight: 600;
+      border-top: 1px solid var(--border);
+      background: #020617;
+    }
+
+    .right {
+      text-align: right;
+    }
+
+    input[type="number"],
+    input[type="date"],
+    select {
+      background: #020617;
+      border-radius: 4px;
+      border: 1px solid #1f2937;
+      color: var(--text);
+      padding: 3px 4px;
+      font-size: 0.78rem;
+      width: 100%;
+    }
+
+    input[type="number"]:focus,
+    input[type="date"]:focus,
+    select:focus {
+      outline: 1px solid var(--accent);
+      border-color: var(--accent);
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      color: var(--text);
+      padding: 5px 12px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s, transform 0.05s, border-color 0.15s;
+    }
+
+    .btn:hover {
+      background: #111827;
+      border-color: var(--accent);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #020617;
+    }
+
+    .btn-primary:hover {
+      background: #0ea5e9;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: transparent;
+      color: var(--text-soft);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid #1f2937;
+      font-size: 0.7rem;
+      color: var(--text-soft);
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--success);
+    }
+
+    .summary-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+      font-size: 0.78rem;
+      color: var(--text-soft);
+    }
+
+    .summary-row span {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid #1f2937;
+    }
+
+    .tag-danger {
+      color: var(--danger);
+    }
+
+    .tag-success {
+      color: var(--success);
+    }
+
+    .flex {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .flex-grow {
+      flex: 1;
+    }
+
+    .mt-4 {
+      margin-top: 8px;
+    }
+
+    .mt-6 {
+      margin-top: 12px;
+    }
+
+    .small {
+      font-size: 0.75rem;
+      color: var(--text-soft);
+    }
+
+    .scroll-y {
+      max-height: 320px;
+      overflow: auto;
+    }
+
+    canvas {
+      max-width: 100%;
+    }
+
+    .pill-danger {
+      background: rgba(248, 113, 113, 0.1);
+      color: var(--danger);
+    }
+
+    .pill-success {
+      background: rgba(74, 222, 128, 0.1);
+      color: var(--success);
+    }
+
+    .pill-neutral {
+      background: rgba(148, 163, 184, 0.1);
+      color: #e5e7eb;
+    }
+
+    .text-mono {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="header">
+      <div class="header-title">
+        <h1>Dashboard de FIIs</h1>
+        <small>Baseado na sua planilha de FIIs, Setores, Aporte e Compras.</small>
+      </div>
+      <div class="flex">
+        <div class="pill">
+          <span></span>
+          <strong>Carteira ao vivo</strong>
+        </div>
+        <button class="btn btn-primary" onclick="recalcularTudo()">
+          🔄 Recalcular tudo
+        </button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- COLUNA ESQUERDA: FIIs + Compras -->
+      <div class="col-left">
+        <!-- FIIs -->
+        <section class="card">
+          <div class="card-header">
+            <div>
+              <h2>FIIs</h2>
+              <small>Posição por ativo, preço médio e valor de mercado.</small>
+            </div>
+            <div class="card-actions">
+              <span class="badge">
+                <span class="badge-dot"></span>
+                Atualiza com base nas compras
+              </span>
+            </div>
+          </div>
+
+          <div class="scroll-y">
+            <table id="tabela-fiis">
+              <thead>
+                <tr>
+                  <th>Ativo</th>
+                  <th>Setor</th>
+                  <th class="right">Qtd. Atual</th>
+                  <th class="right">Preço Atual</th>
+                  <th class="right">Qtd. Comprada</th>
+                  <th class="right">Qtd. Total</th>
+                  <th class="right">Valor Total</th>
+                  <th class="right">Preço Médio</th>
+                  <th class="right">Posição Atual</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Dados da sua planilha -->
+                <tr data-ativo="BRCO11" data-setor="logística">
+                  <td>BRCO11</td>
+                  <td>logística</td>
+                  <td class="right"><input type="number" value="1" step="1" min="0" /></td>
+                  <td class="right"><input type="number" value="117.38" step="0.01" min="0" /></td>
+                  <td class="right" data-qtd-comprada>0</td>
+                  <td class="right" data-qtd-total></td>
+                  <td class="right" data-valor-total></td>
+                  <td class="right" data-preco-medio></td>
+                  <td class="right" data-posicao-atual></td>
+                </tr>
+                <tr data-ativo="BTLG11" data-setor="logística">
+                  <td>BTLG11</td>
+                  <td>logística</td>
+                  <td class="right"><input type="number" value="2" step="1" min="0" /></td>
+                  <td class="right"><input type="number" value="103.56" step="0.01" min="0" /></td>
+                  <td class="right" data-qtd-comprada>0</td>
+                  <td class="right" data-qtd-total></td>
+                  <td class="right" data-valor-total></td>
+                  <td class="right" data-preco-medio></td>
+                  <td class="right" data-posicao-atual></td>
+                </tr>
+                <tr data-ativo="CPTS11" data-setor="papel">
+                  <td>CPTS11</td>
+                  <td>papel</td>
+                  <td class="right"><input type="number" value="33" step="1" min="0" /></td>
+                  <td class="right"><input type="number" value="7.83" step="0.01" min="0" /></td>
+                  <td class="right" data-qtd-comprada>0</td>
+                  <td class="right" data-qtd-total></td>
+                  <td class="right" data-valor-total></td>
+                  <td class="right" data-preco-medio></td>
+                  <td class="right" data-posicao-atual></td>
+                </tr>
+                <tr data-ativo="HFOF11" data-setor="híbridos">
+                  <td>HFOF11</td>
+                  <td>híbridos</td>
+                  <td class="right"><input type="number" value="10" step="1" min="0" /></td>
+                  <td class="right"><input type="number" value="6.74" step="0.01" min="0" /></td>
+                  <td class="right" data-qtd-comprada>0</td>
+                  <td class="right" data-qtd-total></td>
+                  <td class="right" data-valor-total></td>
+                  <td class="right" data-preco-medio></td>
+                  <td class="right" data-posicao-atual></td>
+                </tr>
+                <tr data-ativo="HGBS11" data-setor="shoppings">
+                  <td>HGBS11</td>
+                  <td>shoppings</td>
+                  <td class="right"><input type="number" value="18" step="1" min="0" /></td>
+                  <td class="right"><input type="number" value="20.62" step="0.01" min="0" /></td>
+                  <td class="right" data-qtd-comprada>0</td>
+                  <td class="right" data-qtd-total></td>
+                  <td class="right" data-valor-total></td>
+                  <td class="right" data-preco-medio></td>
+                  <td class="right" data-posicao-atual></td>
+                </tr>
+                <tr data-ativo="HGCR11" data-setor="papel">
+                  <td>HGCR11</td>
+                  <td>papel</td>
+                  <td class="right"><input type="number" value="4" step="1" min="0" /></td>
+                  <td class="right"><input type="number" value="97.03" step="0.01" min="0" /></td>
+                  <td class="right" data-qtd-comprada>0</td>
+                  <td class="right" data-qtd-total></td>
+                  <td class="right" data-valor-total></td>
+                  <td class="right" data-preco-medio></td>
+                  <td class="right" data-posicao-atual></td>
+                </tr>
+                <tr data-ativo="HGLG11" data-setor="logística">
+                  <td>HGLG11</td>
+                  <td>logística</td>
+                  <td class="right"><input type="number" value="1" step="1" min="0" /></td>
+                  <td class="right"><input type="number" value="155.72" step="0.01" min="0" /></td>
+                  <td class="right" data-qtd-comprada>0</td>
+                  <td class="right" data-qtd-total></td>
+                  <td class="right" data-valor-total></td>
+                  <td class="right" data-preco-medio></td>
+                  <td class="right" data-posicao-atual></td>
+                </tr>
+                <tr data-ativo="HGRE11" data-setor="lajes corporativas">
+                  <td>HGRE11</td>
+                  <td>lajes corporativas</td>
+                  <td class="right"><input type="number" value="1" step="1" min="0" /></td>
+                  <td class="right"><input type="number" value="129.05" step="0.01" min="0" /></td>
+                  <td class="right" data-qtd-comprada>0</td>
+                  <td class="right" data-qtd-total></td>
+                  <td class="right" data-valor-total></td>
+                  <td class="right" data-preco-medio></td>
+                  <td class="right" data-posicao-atual></td>
+                </tr>
+                <tr data-ativo="KNCR11" data-setor="papel">
+                  <td>KNCR11</td>
+                  <td>papel</td>
+                  <td class="right"><input type="number" value="2" step="1" min="0" /></td>
+                  <td class="right"><input type="number" value="105.76" step="0.01" min="0" /></td>
+                  <td class="right" data-qtd-comprada>0</td>
+                  <td class="right" data-qtd-total></td>
+                  <td class="right" data-valor-total></td>
+                  <td class="right" data-preco-medio></td>
+                  <td class="right" data-posicao-atual></td>
+                </tr>
+                <tr data-ativo="KNRI11" data-setor="híbridos">
+                  <td>KNRI11</td>
+                  <td>híbridos</td>
+                  <td class="right"><input type="number" value="1" step="1" min="0" /></td>
+                  <td class="right"><input type="number" value="166.45" step="0.01" min="0" /></td>
+                  <td class="right" data-qtd-comprada>0</td>
+                  <td class="right" data-qtd-total></td>
+                  <td class="right" data-valor-total></td>
+                  <td class="right" data-preco-medio></td>
+                  <td class="right" data-posicao-atual></td>
+                </tr>
+                <tr data-ativo="MCCI11" data-setor="papel">
+                  <td>MCCI11</td>
+                  <td>papel</td>
+                  <td class="right"><input type="number" value="4" step="1" min="0" /></td>
+                  <td class="right"><input type="number" value="94.82" step="0.01" min="0" /></td>
+                  <td class="right" data-qtd-comprada>0</td>
+                  <td class="right" data-qtd-total></td>
+                  <td class="right" data-valor-total></td>
+                  <td class="right" data-preco-medio></td>
+                  <td class="right" data-posicao-atual></td>
+                </tr>
+                <tr data-ativo="PVBI11" data-setor="lajes corporativas">
+                  <td>PVBI11</td>
+                  <td>lajes corporativas</td>
+                  <td class="right"><input type="number" value="1" step="1" min="0" /></td>
+                  <td class="right"><input type="number" value="74.91" step="0.01" min="0" /></td>
+                  <td class="right" data-qtd-comprada>0</td>
+                  <td class="right" data-qtd-total></td>
+                  <td class="right" data-valor-total></td>
+                  <td class="right" data-preco-medio></td>
+                  <td class="right" data-posicao-atual></td>
+                </tr>
+                <tr data-ativo="RBRR11" data-setor="papel">
+                  <td>RBRR11</td>
+                  <td>papel</td>
+                  <td class="right"><input type="number" value="1" step="1" min="0" /></td>
+                  <td class="right"><input type="number" value="83.44" step="0.01" min="0" /></td>
+                  <td class="right" data-qtd-comprada>0</td>
+                  <td class="right" data-qtd-total></td>
+                  <td class="right" data-valor-total></td>
+                  <td class="right" data-preco-medio></td>
+                  <td class="right" data-posicao-atual></td>
+                </tr>
+                <tr data-ativo="VINO11" data-setor="lajes corporativas">
+                  <td>VINO11</td>
+                  <td>lajes corporativas</td>
+                  <td class="right"><input type="number" value="2" step="1" min="0" /></td>
+                  <td class="right"><input type="number" value="5.02" step="0.01" min="0" /></td>
+                  <td class="right" data-qtd-comprada>0</td>
+                  <td class="right" data-qtd-total></td>
+                  <td class="right" data-valor-total></td>
+                  <td class="right" data-preco-medio></td>
+                  <td class="right" data-posicao-atual></td>
+                </tr>
+                <tr data-ativo="XPLG11" data-setor="logística">
+                  <td>XPLG11</td>
+                  <td>logística</td>
+                  <td class="right"><input type="number" value="1" step="1" min="0" /></td>
+                  <td class="right"><input type="number" value="100.19" step="0.01" min="0" /></td>
+                  <td class="right" data-qtd-comprada>0</td>
+                  <td class="right" data-qtd-total></td>
+                  <td class="right" data-valor-total></td>
+                  <td class="right" data-preco-medio></td>
+                  <td class="right" data-posicao-atual></td>
+                </tr>
+                <tr data-ativo="XPML11" data-setor="shoppings">
+                  <td>XPML11</td>
+                  <td>shoppings</td>
+                  <td class="right"><input type="number" value="2" step="1" min="0" /></td>
+                  <td class="right"><input type="number" value="110.90" step="0.01" min="0" /></td>
+                  <td class="right" data-qtd-comprada>0</td>
+                  <td class="right" data-qtd-total></td>
+                  <td class="right" data-valor-total></td>
+                  <td class="right" data-preco-medio></td>
+                  <td class="right" data-posicao-atual></td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="8">Total da Carteira (valor de mercado)</td>
+                  <td class="right text-mono" id="total-carteira"></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <div class="summary-row">
+            <span>Total de ativos: <strong id="total-ativos"></strong></span>
+            <span>Ticket médio por ativo: <strong id="ticket-medio"></strong></span>
+          </div>
+        </section>
+
+        <!-- Compras -->
+        <section class="card mt-6">
+          <div class="card-header">
+            <div>
+              <h2>Compras</h2>
+              <small>Registre novas compras e veja o impacto no preço médio.</small>
+            </div>
+            <div class="card-actions">
+              <button class="btn btn-primary" onclick="adicionarCompraLinha()">
+                ➕ Nova compra
+              </button>
+              <button class="btn btn-ghost" onclick="limparCompras()">
+                🧹 Limpar compras
+              </button>
+            </div>
+          </div>
+
+          <div class="small">
+            Cada linha de compra atualiza automaticamente: <strong>Qtd. Comprada</strong>, <strong>Qtd. Total</strong>, <strong>Valor Total</strong> e <strong>Preço Médio</strong do ativo.
+          </div>
+
+          <div class="scroll-y mt-4">
+            <table id="tabela-compras">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Ativo</th>
+                  <th class="right">Qtde</th>
+                  <th class="right">Preço</th>
+                  <th class="right">Valor</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Linhas serão adicionadas via JS -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- COLUNA DIREITA: Setores + Aporte + Gráfico + Momento -->
+      <div class="col-right">
+        <!-- Setores -->
+        <section class="card">
+          <div class="card-header">
+            <div>
+              <h2>Setores</h2>
+              <small>Alocação atual vs. meta por setor.</small>
+            </div>
+            <div class="card-actions">
+              <span class="badge">
+                🎯 Metas configuráveis
+              </span>
+            </div>
+          </div>
+
+          <div class="scroll-y">
+            <table id="tabela-setores">
+              <thead>
+                <tr>
+                  <th>Setor</th>
+                  <th class="right">Valor Total</th>
+                  <th class="right">% Atual</th>
+                  <th class="right">% Meta</th>
+                  <th class="right">Diferença</th>
+                  <th class="right">Falta p/ Meta</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr data-setor="papel">
+                  <td>papel</td>
+                  <td class="right" data-valor-setor></td>
+                  <td class="right" data-pct-atual></td>
+                  <td class="right">
+                    <input type="number" value="40" step="0.1" min="0" max="100" />%
+                  </td>
+                  <td class="right" data-diferenca></td>
+                  <td class="right" data-falta></td>
+                </tr>
+                <tr data-setor="logística">
+                  <td>logística</td>
+                  <td class="right" data-valor-setor></td>
+                  <td class="right" data-pct-atual></td>
+                  <td class="right">
+                    <input type="number" value="25" step="0.1" min="0" max="100" />%
+                  </td>
+                  <td class="right" data-diferenca></td>
+                  <td class="right" data-falta></td>
+                </tr>
+                <tr data-setor="shoppings">
+                  <td>shoppings</td>
+                  <td class="right" data-valor-setor></td>
+                  <td class="right" data-pct-atual></td>
+                  <td class="right">
+                    <input type="number" value="15" step="0.1" min="0" max="100" />%
+                  </td>
+                  <td class="right" data-diferenca></td>
+                  <td class="right" data-falta></td>
+                </tr>
+                <tr data-setor="lajes corporativas">
+                  <td>lajes corporativas</td>
+                  <td class="right" data-valor-setor></td>
+                  <td class="right" data-pct-atual></td>
+                  <td class="right">
+                    <input type="number" value="10" step="0.1" min="0" max="100" />%
+                  </td>
+                  <td class="right" data-diferenca></td>
+                  <td class="right" data-falta></td>
+                </tr>
+                <tr data-setor="híbridos">
+                  <td>híbridos</td>
+                  <td class="right" data-valor-setor></td>
+                  <td class="right" data-pct-atual></td>
+                  <td class="right">
+                    <input type="number" value="10" step="0.1" min="0" max="100" />%
+                  </td>
+                  <td class="right" data-diferenca></td>
+                  <td class="right" data-falta></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="summary-row">
+            <span>Desvio total (módulo): <strong id="desvio-total"></strong></span>
+          </div>
+        </section>
+
+        <!-- Aporte -->
+        <section class="card mt-6">
+          <div class="card-header">
+            <div>
+              <h2>Aporte</h2>
+              <small>Distribuição ideal do aporte por setor.</small>
+            </div>
+            <div class="card-actions">
+              <button class="btn" onclick="calcularAporte()">
+                💰 Recalcular aporte
+              </button>
+            </div>
+          </div>
+
+          <div class="flex mt-4">
+            <label class="flex-grow small">
+              Investimento Disponível:
+              <input type="number" id="investimento-disponivel" value="1000" step="10" min="0" />
+            </label>
+            <span class="badge">
+              📌 Baseado em “Falta p/ Meta”
+            </span>
+          </div>
+
+          <div class="scroll-y mt-4">
+            <table id="tabela-aporte">
+              <thead>
+                <tr>
+                  <th>Setor</th>
+                  <th class="right">Falta p/ Meta</th>
+                  <th class="right">% Proporcional</th>
+                  <th class="right">Aporte Ideal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr data-setor-aporte="papel">
+                  <td>papel</td>
+                  <td class="right" data-falta-aporte></td>
+                  <td class="right" data-pct-proporcional></td>
+                  <td class="right" data-aporte-ideal></td>
+                </tr>
+                <tr data-setor-aporte="logística">
+                  <td>logística</td>
+                  <td class="right" data-falta-aporte></td>
+                  <td class="right" data-pct-proporcional></td>
+                  <td class="right" data-aporte-ideal></td>
+                </tr>
+                <tr data-setor-aporte="shoppings">
+                  <td>shoppings</td>
+                  <td class="right" data-falta-aporte></td>
+                  <td class="right" data-pct-proporcional></td>
+                  <td class="right" data-aporte-ideal></td>
+                </tr>
+                <tr data-setor-aporte="lajes corporativas">
+                  <td>lajes corporativas</td>
+                  <td class="right" data-falta-aporte></td>
+                  <td class="right" data-pct-proporcional></td>
+                  <td class="right" data-aporte-ideal></td>
+                </tr>
+                <tr data-setor-aporte="híbridos">
+                  <td>híbridos</td>
+                  <td class="right" data-falta-aporte></td>
+                  <td class="right" data-pct-proporcional></td>
+                  <td class="right" data-aporte-ideal></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Gráfico -->
+        <section class="card mt-6">
+          <div class="card-header">
+            <div>
+              <h2>Gráfico de Setores</h2>
+              <small>Distribuição atual da carteira por setor.</small>
+            </div>
+            <div class="card-actions">
+              <button class="btn btn-ghost" onclick="atualizarGraficoSetores()">
+                📊 Atualizar gráfico
+              </button>
+            </div>
+          </div>
+          <canvas id="chart-setores" height="180"></canvas>
+        </section>
+
+        <!-- Momento Compra -->
+        <section class="card mt-6">
+          <div class="card-header">
+            <div>
+              <h2>Momento de Compra</h2>
+              <small>Visão rápida de onde o aporte faz mais sentido.</small>
+            </div>
+          </div>
+          <div class="small">
+            Regra simples (que você pode evoluir depois):
+          </div>
+          <ul class="small mt-4">
+            <li><span class="tag-success">Verde</span>: setores com maior “Falta p/ Meta” e maior “Aporte Ideal”.</li>
+            <li><span class="tag-danger">Vermelho</span>: setores acima da meta (Diferença &lt; 0).</li>
+            <li><span class="tag-success">Sugestão:</span> priorize compras nos setores com maior “Aporte Ideal”.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    // ---------- UTILITÁRIOS ----------
+    function formatNumber(num) {
+      if (isNaN(num)) return '';
+      return num.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function parseNumber(str) {
+      if (typeof str === 'number') return str;
+      if (!str) return 0;
+      return parseFloat(
+        String(str)
+          .replace(/\s/g, '')
+          .replace(/\./g, '')
+          .replace(',', '.')
+      ) || 0;
+    }
+
+    // ---------- FIIs & COMPRAS ----------
+    function obterMapaCompras() {
+      const tabelaCompras = document.getElementById('tabela-compras').querySelector('tbody');
+      const mapa = {};
+      Array.from(tabelaCompras.rows).forEach(row => {
+        const ativo = row.querySelector('[data-compra-ativo]').value;
+        const qtd = parseNumber(row.querySelector('[data-compra-qtd]').value);
+        const preco = parseNumber(row.querySelector('[data-compra-preco]').value);
+        const valor = qtd * preco;
+
+        if (!mapa[ativo]) {
+          mapa[ativo] = { qtd: 0, valor: 0 };
+        }
+        mapa[ativo].qtd += qtd;
+        mapa[ativo].valor += valor;
+
+        // Atualiza célula de valor da própria linha
+        row.querySelector('[data-compra-valor]').textContent = formatNumber(valor);
+      });
+      return mapa;
+    }
+
+    function recalcularFiis() {
+      const tabelaFiis = document.getElementById('tabela-fiis').querySelector('tbody');
+      const mapaCompras = obterMapaCompras();
+
+      let totalCarteira = 0;
+      let totalAtivos = 0;
+
+      Array.from(tabelaFiis.rows).forEach(row => {
+        const ativo = row.getAttribute('data-ativo');
+        const qtdAtualInput = row.cells[2].querySelector('input');
+        const precoAtualInput = row.cells[3].querySelector('input');
+
+        const qtdAtual = parseNumber(qtdAtualInput.value);
+        const precoAtual = parseNumber(precoAtualInput.value);
+
+        const dadosCompra = mapaCompras[ativo] || { qtd: 0, valor: 0 };
+        const qtdComprada = dadosCompra.qtd;
+        const valorCompras = dadosCompra.valor;
+
+        const qtdTotal = qtdAtual + qtdComprada;
+
+        // Valor total investido (considerando preço atual para a posição antiga + compras)
+        const valorPosicaoAntiga = qtdAtual * precoAtual;
+        const valorTotalInvestido = valorPosicaoAntiga + valorCompras;
+
+        const precoMedio = qtdTotal > 0 ? valorTotalInvestido / qtdTotal : 0;
+        const posicaoAtual = qtdTotal * precoAtual;
+
+        row.querySelector('[data-qtd-comprada]').textContent = formatNumber(qtdComprada);
+        row.querySelector('[data-qtd-total]').textContent = formatNumber(qtdTotal);
+        row.querySelector('[data-valor-total]').textContent = formatNumber(valorTotalInvestido);
+        row.querySelector('[data-preco-medio]').textContent = formatNumber(precoMedio);
+        row.querySelector('[data-posicao-atual]').textContent = formatNumber(posicaoAtual);
+
+        totalCarteira += posicaoAtual;
+        if (qtdTotal > 0) totalAtivos += 1;
+      });
+
+      document.getElementById('total-carteira').textContent = formatNumber(totalCarteira);
+      document.getElementById('total-ativos').textContent = totalAtivos;
+
+      const ticketMedio = totalAtivos > 0 ? totalCarteira / totalAtivos : 0;
+      document.getElementById('ticket-medio').textContent = formatNumber(ticketMedio);
+
+      return totalCarteira;
+    }
+
+    function adicionarCompraLinha() {
+      const tabelaComprasBody = document.getElementById('tabela-compras').querySelector('tbody');
+      const tabelaFiis = document.getElementById('tabela-fiis').querySelector('tbody');
+
+      const row = tabelaComprasBody.insertRow();
+
+      // Data
+      const cellData = row.insertCell();
+      const inputData = document.createElement('input');
+      inputData.type = 'date';
+      inputData.valueAsDate = new Date();
+      cellData.appendChild(inputData);
+
+      // Ativo
+      const cellAtivo = row.insertCell();
+      const selectAtivo = document.createElement('select');
+      selectAtivo.setAttribute('data-compra-ativo', '');
+      Array.from(tabelaFiis.rows).forEach(r => {
+        const ativo = r.getAttribute('data-ativo');
+        const opt = document.createElement('option');
+        opt.value = ativo;
+        opt.textContent = ativo;
+        selectAtivo.appendChild(opt);
+      });
+      cellAtivo.appendChild(selectAtivo);
+
+      // Qtde
+      const cellQtd = row.insertCell();
+      const inputQtd = document.createElement('input');
+      inputQtd.type = 'number';
+      inputQtd.step = '1';
+      inputQtd.min = '0';
+      inputQtd.value = '1';
+      inputQtd.setAttribute('data-compra-qtd', '');
+      cellQtd.classList.add('right');
+      cellQtd.appendChild(inputQtd);
+
+      // Preço
+      const cellPreco = row.insertCell();
+      const inputPreco = document.createElement('input');
+      inputPreco.type = 'number';
+      inputPreco.step = '0.01';
+      inputPreco.min = '0';
+      inputPreco.value = '10';
+      inputPreco.setAttribute('data-compra-preco', '');
+      cellPreco.classList.add('right');
+      cellPreco.appendChild(inputPreco);
+
+      // Valor
+      const cellValor = row.insertCell();
+      cellValor.classList.add('right');
+      const spanValor = document.createElement('span');
+      spanValor.setAttribute('data-compra-valor', '');
+      cellValor.appendChild(spanValor);
+
+      // Remover
+      const cellRemover = row.insertCell();
+      const btnRemover = document.createElement('button');
+      btnRemover.type = 'button';
+      btnRemover.className = 'btn btn-ghost';
+      btnRemover.textContent = '✖';
+      btnRemover.onclick = () => {
+        row.remove();
+        recalcularTudo();
+      };
+      cellRemover.appendChild(btnRemover);
+
+      // Eventos para recalcular
+      [inputQtd, inputPreco, selectAtivo, inputData].forEach(el => {
+        el.addEventListener('input', () => recalcularTudo());
+      });
+
+      recalcularTudo();
+    }
+
+    function limparCompras() {
+      const tabelaComprasBody = document.getElementById('tabela-compras').querySelector('tbody');
+      tabelaComprasBody.innerHTML = '';
+      recalcularTudo();
+    }
+
+    // ---------- SETORES & APORTE ----------
+    function recalcularSetores(totalCarteira) {
+      const tabelaFiis = document.getElementById('tabela-fiis').querySelector('tbody');
+      const tabelaSetores = document.getElementById('tabela-setores').querySelector('tbody');
+
+      const somaSetores = {};
+      Array.from(tabelaFiis.rows).forEach(row => {
+        const setor = row.getAttribute('data-setor');
+        const posicaoText = row.querySelector('[data-posicao-atual]').textContent;
+        const posicao = parseNumber(posicaoText);
+        if (!somaSetores[setor]) somaSetores[setor] = 0;
+        somaSetores[setor] += posicao;
+      });
+
+      let desvioTotal = 0;
+
+      Array.from(tabelaSetores.rows).forEach(row => {
+        const setor = row.getAttribute('data-setor');
+        const valorSetor = somaSetores[setor] || 0;
+
+        const valorCell = row.querySelector('[data-valor-setor]');
+        const pctAtualCell = row.querySelector('[data-pct-atual]');
+        const metaInput = row.cells[3].querySelector('input');
+        const diferencaCell = row.querySelector('[data-diferenca]');
+        const faltaCell = row.querySelector('[data-falta]');
+
+        valorCell.textContent = formatNumber(valorSetor);
+
+        let pctAtual = 0;
+        if (totalCarteira > 0) {
+          pctAtual = (valorSetor / totalCarteira) * 100;
+        }
+        pctAtualCell.textContent = formatNumber(pctAtual) + ' %';
+
+        const pctMeta = parseNumber(metaInput.value);
+        const diferenca = pctMeta - pctAtual;
+        diferencaCell.textContent = formatNumber(diferenca) + ' %';
+
+        const falta = Math.max(0, diferenca);
+        faltaCell.textContent = formatNumber(falta) + ' %';
+
+        desvioTotal += Math.abs(diferenca);
+      });
+
+      document.getElementById('desvio-total').textContent = formatNumber(desvioTotal) + ' %';
+    }
+
+    function calcularAporte() {
+      const investimento = parseNumber(document.getElementById('investimento-disponivel').value);
+      const tabelaSetores = document.getElementById('tabela-setores').querySelector('tbody');
+      const tabelaAporte = document.getElementById('tabela-aporte').querySelector('tbody');
+
+      const faltaPorSetor = {};
+      let somaFalta = 0;
+
+      Array.from(tabelaSetores.rows).forEach(row => {
+        const setor = row.getAttribute('data-setor');
+        const faltaText = row.querySelector('[data-falta]').textContent.replace('%', '');
+        const falta = parseNumber(faltaText);
+        faltaPorSetor[setor] = falta;
+        somaFalta += falta;
+      });
+
+      Array.from(tabelaAporte.rows).forEach(row => {
+        const setor = row.getAttribute('data-setor-aporte');
+        const faltaCell = row.querySelector('[data-falta-aporte]');
+        const pctPropCell = row.querySelector('[data-pct-proporcional]');
+        const aporteCell = row.querySelector('[data-aporte-ideal]');
+
+        const falta = faltaPorSetor[setor] || 0;
+        faltaCell.textContent = formatNumber(falta) + ' %';
+
+        let pctProporcional = 0;
+        let aporteIdeal = 0;
+
+        if (somaFalta > 0 && investimento > 0) {
+          pctProporcional = (falta / somaFalta) * 100;
+          aporteIdeal = (falta / somaFalta) * investimento;
+        }
+
+        pctPropCell.textContent = formatNumber(pctProporcional) + ' %';
+        aporteCell.textContent = 'R$ ' + formatNumber(aporteIdeal);
+      });
+    }
+
+    // ---------- GRÁFICO ----------
+    let chartSetores = null;
+
+    function atualizarGraficoSetores() {
+      const tabelaSetores = document.getElementById('tabela-setores').querySelector('tbody');
+      const labels = [];
+      const valores = [];
+
+      Array.from(tabelaSetores.rows).forEach(row => {
+        const setor = row.getAttribute('data-setor');
+        const valorText = row.querySelector('[data-valor-setor]').textContent;
+        const valor = parseNumber(valorText);
+        if (valor > 0) {
+          labels.push(setor);
+          valores.push(valor);
+        }
+      });
+
+      const ctx = document.getElementById('chart-setores').getContext('2d');
+
+      if (chartSetores) {
+        chartSetores.destroy();
+      }
+
+      chartSetores = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels,
+          datasets: [{
+            data: valores,
+            backgroundColor: [
+              '#38bdf8',
+              '#22c55e',
+              '#f97316',
+              '#a855f7',
+              '#facc15'
+            ],
+            borderColor: '#020617',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          plugins: {
+            legend: {
+              labels: {
+                color: '#e5e7eb',
+                font: { size: 11 }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // ---------- ORQUESTRAÇÃO ----------
+    function recalcularTudo() {
+      const total = recalcularFiis();
+      recalcularSetores(total);
+      calcularAporte();
+      atualizarGraficoSetores();
+    }
+
+    // Eventos de mudança nos inputs de FIIs e metas de setores
+    function registrarEventos() {
+      const tabelaFiis = document.getElementById('tabela-fiis').querySelector('tbody');
+      Array.from(tabelaFiis.querySelectorAll('input')).forEach(input => {
+        input.addEventListener('input', () => recalcularTudo());
+      });
+
+      const tabelaSetores = document.getElementById('tabela-setores').querySelector('tbody');
+      Array.from(tabelaSetores.querySelectorAll('input')).forEach(input => {
+        input.addEventListener('input', () => recalcularTudo());
+      });
+
+      document.getElementById('investimento-disponivel').addEventListener('input', () => calcularAporte());
+    }
+
+    window.addEventListener('load', () => {
+      registrarEventos();
+      // Começa com uma linha de compra de exemplo (opcional)
+      // adicionarCompraLinha();
+      recalcularTudo();
+    });
+  </script>
+</body>
+</html>
